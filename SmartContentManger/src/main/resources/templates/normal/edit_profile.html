@@ -1,0 +1,39 @@
+  <!DOCTYPE html>
+  <html lang="en" xmlns:th="http://www.thymeleaf.org" >
+  <head>
+      <meta charset="UTF-8">
+      <title>Title</title>
+  </head>
+  <body>
+  <form th:action="@{/user/update}" method="post" th:object="${user}">
+
+      <!-- Hidden ID (VERY IMPORTANT) -->
+      <input type="hidden" th:field="*{id}" />
+
+      <div class="mb-3">
+        <label>Name</label>
+        <input type="text" th:field="*{name}" class="form-control"/>
+      </div>
+
+      <div class="mb-3">
+        <label>Email</label>
+        <input type="email" th:field="*{email}" class="form-control"/>
+      </div>
+
+      <div class="mb-3">
+        <label>About</label>
+        <textarea th:field="*{about}" class="form-control"></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label>Role</label>
+        <input type="text" th:field="*{role}" class="form-control"/>
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="btn btn-success">Update</button>
+      </div>
+
+  </form>
+  </body>
+  </html>

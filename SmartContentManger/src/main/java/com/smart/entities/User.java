@@ -10,14 +10,17 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 public class User {
      @Id
      @GeneratedValue(strategy = GenerationType.AUTO)
 	 private int id;
+	@NotBlank(message = "Name is required")
 	 private String  name;
 	@Column(unique = true)
+	@NotBlank(message = "Email is required")
 	 private String  email;
 	 private String  password;
 	 private String  role;

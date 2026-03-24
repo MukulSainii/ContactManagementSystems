@@ -31,6 +31,10 @@ public class CustomUserDetails implements UserDetails{
         return user.getPassword();
     }
 
+    public User getUser() {
+        return user;
+    }
+
     // Returns the username used to authenticate the user
     @Override
     public String getUsername() {

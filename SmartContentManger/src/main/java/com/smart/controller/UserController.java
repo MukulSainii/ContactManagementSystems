@@ -10,6 +10,10 @@ import java.security.Principal;
 import java.util.Map;
 import java.util.Optional;
 
+import com.smart.DTO.UserDTO;
+import com.smart.DTO.mapper.UserMapper;
+import com.smart.helper.SecurityUtils;
+import jakarta.validation.Valid;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -20,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +44,7 @@ import com.smart.entities.User;
 import com.smart.helper.Message;
 
 import jakarta.servlet.http.HttpSession;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/user")
@@ -51,32 +57,19 @@ public class UserController {
 	private ContactRepository contactRepository;
 	@Autowired
 	private MyOrderRepository myOrderRepository;
+	@Autowired
+	private UserMapper userMapper;
 	
-	
-  /* 
-   *  method for adding common data to response
-   *  create common method which run for every handler,
-   *  And this annotation will make this method to run for every handler of this class 
-   *  
+  /*
+   *  This annotation will make this method to run before every handler of this controller class
+   *  This method is used for set profile name in the header
+   *  instead for fetching user for every request and pass in the model to show login username, use this resuable code
    *  */
 	@ModelAttribute
-	public void addCommonData(Model model,Principal principal) {
-		/**principal is object of spring security which could identify the unique value or principal value from table .
-		 * this could be username and email,etc.
-		 */		  
-		String uname = principal.getName();
-		System.out.println("username"+uname);
-		   
-		/** getting the user from database using unique value (Email) which got through principal*/
-		User user = userRepository.getUserByUserName(uname);
-	    System.out.println("user"+user);
-	    
-		/*
-		 * send that user into model
-		 * Model basically take data from controller and send to viewResolver ,
-		 * viewResolver send that data to client(from Model-View Architecture)
-		 */		
-	    model.addAttribute("user",user);
+	public void addCommonData(Model model) {
+		User user = SecurityUtils.getCurrentUser();
+		UserDTO dto = userMapper.toDto(user);
+		model.addAttribute("user", dto);
 	}
 	
 	
@@ -234,17 +227,13 @@ public class UserController {
 					    System.out.println("delete successfully");
 					//send success message to user through session
 					session.setAttribute("message",new Message("contact delete successfully..!!","success"));
-					
-					
 				} else {
 				    // Handle the case where the contact with the given ID was not found
 					System.out.println("given id is not found!!");
 				}
-				
 				return"redirect:/user/show_contact/0";
 			}
-			
-			
+
 		//handler for update form
 			@PostMapping("/update_contact/{Cid}")
 			public String updateForm(@PathVariable("Cid")Integer Cid,Model model) {
@@ -305,7 +294,10 @@ public class UserController {
 			//handler for profile
 			@GetMapping("/profile")
 			public String yourProfile(Model model) {
-				
+				if (!model.containsAttribute("profileForm")) {
+					User currentUser = (User) model.asMap().get("user"); // already set by addCommonData
+					model.addAttribute("profileForm", currentUser);
+				}
 				return "normal/profile";
 			}
 			
@@ -344,13 +336,10 @@ public class UserController {
 			public String createOrder(@RequestBody Map<String, Object>data,Principal principal) throws Exception {
 				System.out.println("order function executed");
 				System.out.println(data);
-				
 				int amt=Integer.parseInt(data.get("amount").toString());
 				System.out.println("amt is : "+amt);
 				//create client(key,secret) ==from rozarpay site which we generate
 				 var client= new RazorpayClient("rzp_test_aetInMhOh05zJ3", "3XoB97MoSvRzLHjcmf7zTTFN");
-				 
-				 
 				 //creating order
 				 JSONObject object=new JSONObject();
 				 object.put("amount", amt*100);//our amount in rupees ,but we have convert it into paise
@@ -385,6 +374,40 @@ public class UserController {
 				
 				System.out.println(data);
 				return ResponseEntity.ok(Map.of("msg","updated"));
+			}
+
+			/*
+			* this method update login user profile data
+			* along with update security context which hold login user data
+			* during update check email should be unique
+			* */
+			@PostMapping("/profile")
+			public String showProfileEdit(@Valid @ModelAttribute("user") UserDTO userDto, BindingResult result, HttpSession session, Principal principal, RedirectAttributes redirectAttributes){
+				if(result.hasErrors()) {
+					System.out.println("i am here inside the error");
+//					redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
+					redirectAttributes.addFlashAttribute("profileForm", userDto);
+					session.setAttribute("message",new Message("not updated field is required!!","danger"));
+					return "redirect:/user/profile";
+				}
+				User existingUser = userRepository.getUserByUserName(userDto.getEmail());
+				// Only check DB if email changed
+				String loggedInEmail = principal.getName();
+				if (!loggedInEmail.equals(userDto.getEmail())) {
+					if (existingUser != null && existingUser.getId() != userDto.getId()) {
+						System.out.println("i am  2 ");
+						session.setAttribute("message", new Message("Email already exists!", "danger"));
+						return "redirect:/user/profile";
+					}
+				}
+				//to avoid overwrite unintended data,manually update only those fields you want to update
+				existingUser.setEmail(userDto.getEmail());
+				existingUser.setName(userDto.getName());
+				existingUser.setAbout(userDto.getAbout());
+				User updatedUser = userRepository.save(existingUser);
+				SecurityUtils.updateCurrentUser(updatedUser);
+				session.setAttribute("message",new Message("profile update successfully..!!","success"));
+		       return "redirect:/user/profile";
 			}
 }
 
