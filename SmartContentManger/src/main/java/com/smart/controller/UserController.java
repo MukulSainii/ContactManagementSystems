@@ -294,10 +294,10 @@ public class UserController {
 			//handler for profile
 			@GetMapping("/profile")
 			public String yourProfile(Model model) {
-				if (!model.containsAttribute("profileForm")) {
-					User currentUser = (User) model.asMap().get("user"); // already set by addCommonData
-					model.addAttribute("profileForm", currentUser);
-				}
+//				if (!model.containsAttribute("profileForm")) {
+//					User currentUser = (User) model.asMap().get("user"); // already set by addCommonData
+//					model.addAttribute("profileForm", currentUser);
+//				}
 				return "normal/profile";
 			}
 			
