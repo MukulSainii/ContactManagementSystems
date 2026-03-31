@@ -67,7 +67,7 @@
 		  
 		  <!--success message ,only show when session have content message attribute -->
 		  <div th:if="${session.message}" class=" container ">
-			  <div th:classappend="${'alert-'+session.message.type}" class="alert alert-success text-center" role="alert">
+			  <div id="flashMessage"    th:classappend="${'alert-'+session.message.type}" class="alert alert-success text-center" role="alert">
 			      <span th:text="${session.message.content}"></span>
 			  </div>
 		  </div>
@@ -100,6 +100,14 @@
 				  }
 				});
 		}
+
+		//hide session message after 5 sec
+		setTimeout(function () {
+            let msg = document.getElementById("flashMessage");
+            if (msg) {
+                msg.style.display = "none";
+            }
+        }, 5000);
 	</script>
     
     <!--our java script-->

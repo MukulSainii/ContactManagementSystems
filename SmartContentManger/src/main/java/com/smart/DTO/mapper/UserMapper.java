@@ -6,7 +6,10 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
+    @Mapping(target = "contacts", ignore = true)
     UserDTO toDto(User user);
+
+//    UserDTO toDtoWithContacts(User user);
     User toEntity(UserDTO dto);
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "role",ignore = true)

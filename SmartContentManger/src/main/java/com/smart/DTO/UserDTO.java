@@ -1,8 +1,13 @@
 package com.smart.DTO;
 
+import com.smart.entities.Contact;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class UserDTO {
@@ -12,7 +17,7 @@ public class UserDTO {
     private String name;
 
     @NotBlank(message = "Email is required")
-    @Email
+    @Email(message = "Invalid email format")
     private String email;
 
     private String role;
@@ -22,4 +27,5 @@ public class UserDTO {
     private String about;
 
     private boolean enabled;
+    private List<Contact> contacts=new ArrayList<>();
 }

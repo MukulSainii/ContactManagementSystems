@@ -17,10 +17,8 @@ public class User {
      @Id
      @GeneratedValue(strategy = GenerationType.AUTO)
 	 private int id;
-	@NotBlank(message = "Name is required")
 	 private String  name;
 	@Column(unique = true)
-	@NotBlank(message = "Email is required")
 	 private String  email;
 	 private String  password;
 	 private String  role;
