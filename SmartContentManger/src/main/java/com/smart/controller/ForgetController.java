@@ -72,7 +72,8 @@ public class ForgetController {
         // If OTP matches
         if (MyOtp == otp) {
             // Show password change view
-            User user = this.userRepository.getUserByUserName(email);
+            User user = this.userRepository.getUserByUserName(email)
+                    .orElseThrow(()-> new RuntimeException("User Not Found"));
 
             // Database se user aana chahiye
             if (user == null) {
@@ -93,7 +94,8 @@ public class ForgetController {
     @PostMapping("/changePassword")
     public String changePassword(@RequestParam("newpassword") String newPassword, HttpSession session) {
         String email = (String) session.getAttribute("email");
-        User user = this.userRepository.getUserByUserName(email);
+        User user = this.userRepository.getUserByUserName(email)
+                .orElseThrow(()-> new RuntimeException("User Not Found"));
         user.setPassword(this.bCryptPasswordEncoder.encode(newPassword));
         this.userRepository.save(user);
         return "redirect:/signin?change=password change successfully";

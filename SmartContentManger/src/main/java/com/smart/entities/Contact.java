@@ -4,12 +4,8 @@ package com.smart.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import com.smart.enums.ContactCategory;
+import jakarta.persistence.*;
 
 @Entity
 public class Contact {
@@ -22,6 +18,10 @@ public class Contact {
 	private String email;
 	private String phone;
 	private String image;
+
+//	@Column(name = "category", columnDefinition = "VARCHAR(50)")
+	@Enumerated(EnumType.STRING)
+	private ContactCategory category;
 	@Column(length=5000)
 	private String description;
 	@ManyToOne
@@ -83,10 +83,17 @@ public class Contact {
 	public void setUser(User user) {
 		this.user = user;
 	}
+	public ContactCategory getCategory() {
+		return category;
+	}
+
+	public void setCategory(ContactCategory category) {
+		this.category = category;
+	}
 	@Override
 	public String toString() {
 		return "Contact [Cid=" + Cid + ", name=" + name + ", secondname=" + secondname + ", work=" + work + ", email="
-				+ email + ", phone=" + phone + ", image=" + image + ", description=" + description + ", user=" + user
+				+ email + ", phone=" + phone + ", category=" + category + ", image=" + image + ", description=" + description + ", user=" + user
 				+ "]";
 	}
 	

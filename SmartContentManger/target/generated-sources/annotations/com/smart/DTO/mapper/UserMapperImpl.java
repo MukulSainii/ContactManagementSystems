@@ -1,14 +1,17 @@
 package com.smart.DTO.mapper;
 
 import com.smart.DTO.UserDTO;
+import com.smart.entities.Contact;
 import com.smart.entities.User;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-03-24T15:26:46+0530",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 20.0.2 (Oracle Corporation)"
+    date = "2026-03-28T19:09:55+0530",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.45.0.v20260224-0835, environment: Java 21.0.10 (Eclipse Adoptium)"
 )
 @Component
 public class UserMapperImpl implements UserMapper {
@@ -21,13 +24,13 @@ public class UserMapperImpl implements UserMapper {
 
         UserDTO userDTO = new UserDTO();
 
-        userDTO.setId( user.getId() );
-        userDTO.setName( user.getName() );
-        userDTO.setEmail( user.getEmail() );
-        userDTO.setRole( user.getRole() );
-        userDTO.setImageURL( user.getImageURL() );
         userDTO.setAbout( user.getAbout() );
+        userDTO.setEmail( user.getEmail() );
         userDTO.setEnabled( user.isEnabled() );
+        userDTO.setId( user.getId() );
+        userDTO.setImageURL( user.getImageURL() );
+        userDTO.setName( user.getName() );
+        userDTO.setRole( user.getRole() );
 
         return userDTO;
     }
@@ -47,6 +50,10 @@ public class UserMapperImpl implements UserMapper {
         user.setImageURL( dto.getImageURL() );
         user.setAbout( dto.getAbout() );
         user.setEnabled( dto.isEnabled() );
+        List<Contact> list = dto.getContacts();
+        if ( list != null ) {
+            user.setContacts( new ArrayList<Contact>( list ) );
+        }
 
         return user;
     }
@@ -66,6 +73,19 @@ public class UserMapperImpl implements UserMapper {
         }
         if ( dto.getAbout() != null ) {
             user.setAbout( dto.getAbout() );
+        }
+        if ( user.getContacts() != null ) {
+            List<Contact> list = dto.getContacts();
+            if ( list != null ) {
+                user.getContacts().clear();
+                user.getContacts().addAll( list );
+            }
+        }
+        else {
+            List<Contact> list = dto.getContacts();
+            if ( list != null ) {
+                user.setContacts( new ArrayList<Contact>( list ) );
+            }
         }
     }
 }

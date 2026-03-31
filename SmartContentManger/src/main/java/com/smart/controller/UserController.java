@@ -10,9 +10,13 @@ import java.security.Principal;
 import java.util.Map;
 import java.util.Optional;
 
+import com.smart.DTO.ContactDTO;
 import com.smart.DTO.UserDTO;
+import com.smart.DTO.mapper.ContactMapper;
 import com.smart.DTO.mapper.UserMapper;
+import com.smart.enums.ContactCategory;
 import com.smart.helper.SecurityUtils;
+import com.smart.service.UserService;
 import jakarta.validation.Valid;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +63,10 @@ public class UserController {
 	private MyOrderRepository myOrderRepository;
 	@Autowired
 	private UserMapper userMapper;
+	@Autowired
+	private ContactMapper contactMapper;
+	@Autowired
+	private UserService userService;
 	
   /*
    *  This annotation will make this method to run before every handler of this controller class
@@ -88,42 +96,42 @@ public class UserController {
 		model.addAttribute("title","Add Contact"); 
 		
 		// this contact object send to addContact.html page form tag (th:object)
-		model.addAttribute("contact",new Contact());
+		model.addAttribute("contactDTO",new ContactDTO());
+		model.addAttribute("contactTypes", ContactCategory.values());
 		return "normal/addContact";
 	}
 	
 	
 	/**processing contact form,after adding successfully again show addContact.html page for add another contact */
 	@PostMapping("/process-contact")
-	public String  processContact(@ModelAttribute Contact contact,                        //form ke ander jo field h uska sara data contact variable me aa jayga
-			                      @RequestParam("profileImage")MultipartFile file  ,     //for store the file which client upload on server(addContact.html)
-			                       Principal principal,
-			                       HttpSession session) {
+	public String  processContact(@Valid @ModelAttribute ContactDTO contactDto, BindingResult result,                        //form ke ander jo field h uska sara data contact variable me aa jayga
+								  @RequestParam("profileImage")MultipartFile file  ,     //for store the file which client upload on server(addContact.html)
+								  Principal principal,
+								  HttpSession session,RedirectAttributes redirectAttributes,Model model
+	) {
 		try {
 			//user ka data DataBase me save karne ke liye phle user chayye hoga jo login h 
 			//use nikalne ke liye security se principal class hamri help karti h
 			//ye user ka unique id nikal ke de dega
+			if(result.hasErrors()){
+//				redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
+				System.out.println("binding result : "+result);
+				model.addAttribute("contactTypes", ContactCategory.values());
+				return "normal/addContact";
+			}
 			String name=principal.getName();
 			
 			//on this method we write query for fetching data from DB of give unique id,all data store in user
-			User user=this.userRepository.getUserByUserName(name);
-			
-			// if error occur then throw exception
-			/*
-			if(3>2) {
- 			throw new Exception();
-			}
-			*/
-			
-			
-			//processing the image 
+			User user=this.userRepository.getUserByUserName(name)
+					.orElseThrow(() -> new RuntimeException("User not found"));
+			//processing the image
 			  if(file.isEmpty()) {
 				  //if file is empty then print message 
 				  System.out.println("file i empty");
-				  contact.setImage("contact.png");
+				  contactDto.setImage("contact.png");
 			  }else {
 				//otherwise store the file in folder and update its url in database
-				  contact.setImage(file.getOriginalFilename());
+				  contactDto.setImage(file.getOriginalFilename());
 				  
 				  //this  class save file in given folder
 				  File sfile = new ClassPathResource("static/Image").getFile();
@@ -137,27 +145,23 @@ public class UserController {
 			
 			
 			//by-directional mapping h to contact bhi save karna hoga
-			contact.setUser(user);
-			
+			contactDto.setUser(user);
+			System.out.println("contact DTO_to_entity : "+contactMapper.toEntity(contactDto));
 			//getContects method give list of all contact ,and add method add this contact to this user
-			user.getContacts().add(contact);
+			user.getContacts().add(contactMapper.toEntity(contactDto));
 			
 			//save this user in database
 			this.userRepository.save(user);
-			
-			System.out.println("DATA :" +contact);
-			
+			System.out.println("DATA :" +contactDto);
 			//success message 
 			session.setAttribute("message",  new Message("your contact is added!! Add more ..","success"));
-		}catch (Exception e) {
-			System.out.println("ERROR:"+e.getMessage());
+		} catch (Exception e) {
+			System.out.println("ERROR:" + e.getMessage());
 			e.printStackTrace();
 			//failure message 
-			session.setAttribute("message",  new Message("Somthing went wrong!! ","danger"));
-
-			
+			session.setAttribute("message", new Message("Somthing went wrong!! ", "danger"));
 		}
-			return "normal/addContact";
+		return "redirect:/user/addContact";
 	}
 	
 	     //show contact handler
@@ -166,7 +170,8 @@ public class UserController {
 			@GetMapping("/show_contact/{page}")  // user se page bhi le-lenge aur pathvarible ue fetch kar lega url se
 			public String showContact(@PathVariable("page") Integer page,Model model,Principal principal) {
 				String userUniqueId=principal.getName();   //this get email of user  from database through which user is login
-				User user = this.userRepository.getUserByUserName(userUniqueId);// repository fire query and get all detail of user of this email
+				User user = this.userRepository.getUserByUserName(userUniqueId)
+						 .orElseThrow(()-> new RuntimeException("User Not Found"));// repository fire query and get all detail of user of this email
 				
 				//page  no. ,page size
 				Pageable pageable = PageRequest.of(page,5);
@@ -189,7 +194,8 @@ public class UserController {
 				Contact contact = contactOpt.get(); //to get data from optional we use get method ,which is method of optinal class
 				
 				String username = principal.getName();//get unique id  through which user login
-				User user = this.userRepository.getUserByUserName(username);//using that id fetch data from data base 
+				User user = this.userRepository.getUserByUserName(username)
+						.orElseThrow(()-> new RuntimeException("User Not Found"));//using that id fetch data from data base
 				
 				//user.getId()-vo id jo url sho ho rhi h aur jisse banda login h
 				//contact.useer.id-vo id jo database me us user ki h jiska aap contact detail dekna cha rhe ho
@@ -219,7 +225,8 @@ public class UserController {
 //					this.contactRepository.delete(contact);
 					
 					//removing bug from delete contact
-					  User user = this.userRepository.getUserByUserName(principal.getName());
+					  User user = this.userRepository.getUserByUserName(principal.getName())
+							  .orElseThrow(()-> new RuntimeException("User Not Found"));
 					   user.getContacts().remove(contact);  //is contact ki id se jo contact match kar jayga from contacts use remove kar dega ye method
 					   this.userRepository.save(user);
 					
@@ -279,7 +286,8 @@ public class UserController {
 						contact.setImage(oldContactDetails.getImage());
 					}
 					//get id and update that id as well
-					User user = this.userRepository.getUserByUserName(principal.getName());
+					User user = this.userRepository.getUserByUserName(principal.getName())
+							.orElseThrow(()-> new RuntimeException("User Not Found"));
 					contact.setUser(user);
 					//save the update
 					this.contactRepository.save(contact);
@@ -312,7 +320,8 @@ public class UserController {
 			public String changePassword(@RequestParam("oldPassword")String oldPassword,@RequestParam("newPassword")String newPassword,Principal principal,HttpSession session) {
 				System.out.println("Old Password :-"+oldPassword);
 				System.out.println("new Password :-"+newPassword);
-				User currentUser = this.userRepository.getUserByUserName(principal.getName());
+				User currentUser = this.userRepository.getUserByUserName(principal.getName())
+						.orElseThrow(()-> new RuntimeException("User Not Found"));
 				if(this.bCryptPasswordEncoder.matches(oldPassword, currentUser.getPassword())) {
 					//change password
 					currentUser.setPassword(this.bCryptPasswordEncoder.encode(newPassword));
@@ -356,7 +365,9 @@ public class UserController {
 				 myOrder.setPaymentId(null);
 				 myOrder.setStatus("created");
 				 myOrder.setReceipt(order.get("receipt"));
-				 myOrder.setUser(this.userRepository.getUserByUserName(principal.getName()));
+				 myOrder.setUser(this.userRepository.getUserByUserName(principal.getName())
+						               .orElseThrow(()-> new RuntimeException("User Not Found"))
+				               );
 				 
 				 this.myOrderRepository.save(myOrder);
 				 
@@ -390,7 +401,8 @@ public class UserController {
 					session.setAttribute("message",new Message("not updated field is required!!","danger"));
 					return "redirect:/user/profile";
 				}
-				User existingUser = userRepository.getUserByUserName(userDto.getEmail());
+				User existingUser = userRepository.getUserByUserName(userDto.getEmail())
+						.orElseThrow(() -> new RuntimeException("User not found"));
 				// Only check DB if email changed
 				String loggedInEmail = principal.getName();
 				if (!loggedInEmail.equals(userDto.getEmail())) {

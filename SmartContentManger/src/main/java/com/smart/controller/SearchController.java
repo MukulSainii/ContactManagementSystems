@@ -27,7 +27,8 @@ public class SearchController {
      @GetMapping("/search/{query}")
      public ResponseEntity<?> search(@PathVariable("query") String query,Principal principal){
     	 System.out.println("your search query:"+query);
-    	 User user = this.userRepository.getUserByUserName(principal.getName());
+    	 User user = this.userRepository.getUserByUserName(principal.getName())
+                 .orElseThrow(()-> new RuntimeException("User Not Found"));
     	 List<Contact> contact = this.contactRepository.findByNameContainingAndUser(query, user);
     	 System.out.println("your query contact is : "+contact);
     	 return ResponseEntity.ok(contact);

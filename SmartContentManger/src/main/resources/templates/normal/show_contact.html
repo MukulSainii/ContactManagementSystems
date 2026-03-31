@@ -39,7 +39,7 @@
 					      <!--show image from folder to client on server-->
 					      <td >
 							  <img src="" class="my_profile_picture" th:src="@{'/Image/'+${c.image}}" alt="profile photo"/>
-							  <span th:text="${c.name}"></span>
+							  <span th:text="${c.name + (#strings.isEmpty(c.secondname) ? '' : ' ' + c.secondname)}"></span>
 						  </td>
 					      <td >
 							  <a href="" th:href="@{'/user/contact/'+${c.Cid}}">
