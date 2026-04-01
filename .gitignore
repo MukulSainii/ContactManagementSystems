@@ -5,4 +5,5 @@ target/
 *.jar
 node_modules/
 .env
+.vscode/
 src/main/resources/application-dev.properties
