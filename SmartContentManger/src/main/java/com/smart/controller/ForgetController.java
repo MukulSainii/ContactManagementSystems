@@ -11,10 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.smart.dao.UserRepository;
 import com.smart.entities.User;
-import com.smart.helper.Message;
 import com.smart.service.EmailService;
-
-import jakarta.mail.Session;
 import jakarta.servlet.http.HttpSession;
 
 @Controller

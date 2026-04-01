@@ -3,7 +3,6 @@ package com.smart.DTO.mapper;
 import com.smart.DTO.ContactDTO;
 import com.smart.entities.Contact;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface ContactMapper {
