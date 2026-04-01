@@ -65,6 +65,7 @@ public class HomeController {
 
             System.out.println("Agreement: " + agreement);
             System.out.println("User: " + user);
+            System.out.println("result: " + result);
 
             model.addAttribute("user", new User());
             session.setAttribute("message", new Message("Successfully registered!", "alert-success"));

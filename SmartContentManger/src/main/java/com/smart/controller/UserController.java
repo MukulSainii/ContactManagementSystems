@@ -65,8 +65,7 @@ public class UserController {
 	private UserMapper userMapper;
 	@Autowired
 	private ContactMapper contactMapper;
-	@Autowired
-	private UserService userService;
+
 	
   /*
    *  This annotation will make this method to run before every handler of this controller class
