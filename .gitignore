@@ -1,8 +1,61 @@
-.idea/
+# ===============================
+# 🔹 Build folders
+# ===============================
 target/
-*.log
+build/
+out/
+
+# ===============================
+# 🔹 Compiled files
+# ===============================
 *.class
 *.jar
-node_modules/
+*.war
+*.ear
+
+# ===============================
+# 🔹 Logs
+# ===============================
+*.log
+logs/
+
+# ===============================
+# 🔹 IDE - IntelliJ
+# ===============================
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# ===============================
+# 🔹 IDE - VS Code
+# ===============================
+.vscode/
+
+# ===============================
+# 🔹 OS files
+# ===============================
+.DS_Store
+Thumbs.db
+
+# ===============================
+# 🔹 Environment files
+# ===============================
 .env
+.env.*
+
+# ===============================
+# 🔹 Spring Boot config (optional)
+# ===============================
 src/main/resources/application-dev.properties
+src/main/resources/application-local.properties
+
+# ===============================
+# 🔹 Node (if frontend exists)
+# ===============================
+node_modules/
+
+# ===============================
+# 🔹 Maven Wrapper logs
+# ===============================
+.mvn/wrapper/maven-wrapper.jar
