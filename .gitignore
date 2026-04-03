@@ -47,8 +47,8 @@ Thumbs.db
 # ===============================
 # 🔹 Spring Boot config (optional)
 # ===============================
-src/main/resources/application-dev.properties
-src/main/resources/application-local.properties
+**/application-dev.properties
+**/application-local.properties
 
 # ===============================
 # 🔹 Node (if frontend exists)
