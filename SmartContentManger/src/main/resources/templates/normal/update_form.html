@@ -39,7 +39,7 @@
 											
 										</div>
 									</div>
-									<input th:value="${contact.secondname}" required  type="text" id="secondName"name="secondname" placeholder="Enter secondName here" class="form-control">
+									<input th:value="${contact.secondname}"  type="text" id="secondName"name="secondname" placeholder="Enter secondName here" class="form-control">
 								</div> 
 								       
 								<!--phone field-->
@@ -50,7 +50,17 @@
 											
 										</div>
 									</div>
-									<input th:value="${contact.phone}" required min="10"  type="number" id="phone"name="phone" placeholder="Enter phone number here" class="form-control">
+									<input required
+										   minlength="8"
+										   maxlength="15"
+										   type="text"
+										   id="phone"
+										   class="form-control"
+										   pattern="^(\+91|91)?[6-9][0-9]{9}$"
+										   placeholder="Enter phone number here"
+										   th:field="*{phone}"
+										   oninvalid="this.setCustomValidity('Please enter valid Indian phone number start with 9/7/6')"
+										   oninput="this.setCustomValidity('') ">
 								</div>        
 							
 								<!--email field-->
@@ -99,13 +109,6 @@
 				</div>
 			</div>
 		</div>
-		<!--java script for adding tinymce editor-->
-		<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
-		        <script>
-				      tinymce.init({
-				        selector: '#mytextarea'
-				      });
-		        </script>
 		
 	</section>
   </body>
