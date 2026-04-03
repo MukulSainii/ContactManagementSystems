@@ -48,10 +48,10 @@
 				          </td>
 					      <td th:text="${c.phone}">@mdo</td>
 					      <td>
-							 <form  th:action="@{'/user/update_contact/'+${c.Cid}}"  method="post">
-   							   <button class="btn btn-primary btn-sm">Update</button>
-							 </form>
-				             <a  href="#" th:onclick="|deleteContact(${c.Cid})|" class="btn btn-danger btn-sm" style="margin-top: 5px;">Delete</a>  
+							 <a  th:href="@{'/user/update_contact/'+${c.Cid}}"
+   							    class="btn btn-primary btn-sm">Update
+							 </a>
+				             <a  href="#" th:onclick="|deleteContact(${c.Cid})|" class="btn btn-danger btn-sm mb-1" style="margin-top: 5px;">Delete</a>
 						  </td>
 					    </tr>
 					  

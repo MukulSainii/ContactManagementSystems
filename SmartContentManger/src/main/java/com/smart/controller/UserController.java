@@ -16,6 +16,7 @@ import com.smart.DTO.mapper.ContactMapper;
 import com.smart.DTO.mapper.UserMapper;
 import com.smart.enums.ContactCategory;
 import com.smart.helper.SecurityUtils;
+import com.smart.service.ContactService;
 import com.smart.service.UserService;
 import jakarta.validation.Valid;
 import org.json.JSONObject;
@@ -65,6 +66,11 @@ public class UserController {
 	private UserMapper userMapper;
 	@Autowired
 	private ContactMapper contactMapper;
+	@Autowired
+	private ContactService contactService;
+
+	@Autowired
+	private UserService userService;
 
 	
   /*
@@ -166,7 +172,7 @@ public class UserController {
 	     //show contact handler
          //per page5[n]-where n is no. of page
 	     //current page=[0]
-			@GetMapping("/show_contact/{page}")  // user se page bhi le-lenge aur pathvarible ue fetch kar lega url se
+			@GetMapping("/show_contact/{page}")
 			public String showContact(@PathVariable("page") Integer page,Model model,Principal principal) {
 				String userUniqueId=principal.getName();   //this get email of user  from database through which user is login
 				User user = this.userRepository.getUserByUserName(userUniqueId)
@@ -182,27 +188,11 @@ public class UserController {
 				return "normal/show_contact";
 			}
 	
-//	   Handler for show particular contact details
+            /* Handler for show particular contact details */
 			@GetMapping("/contact/{Cid}")
 			public String showContactDetails(@PathVariable("Cid")Integer Cid,Model model,Principal principal) {
-				System.out.println("C_ID:"+ Cid);
-				
-				
-				
-				Optional<Contact> contactOpt = this.contactRepository.findById(Cid);  //this fire query and get all detail of given contact ,id which we given,and result wrapped in optional(its like list)  
-				Contact contact = contactOpt.get(); //to get data from optional we use get method ,which is method of optinal class
-				
-				String username = principal.getName();//get unique id  through which user login
-				User user = this.userRepository.getUserByUserName(username)
-						.orElseThrow(()-> new RuntimeException("User Not Found"));//using that id fetch data from data base
-				
-				//user.getId()-vo id jo url sho ho rhi h aur jisse banda login h
-				//contact.useer.id-vo id jo database me us user ki h jiska aap contact detail dekna cha rhe ho
-				//agar ye dono id same h to iska mtlb ,vahi user h isse permission h apna data dekhne ki to ham contact ki detail server pe send kar denge ,, but agar same nhi h to usse persion nhi h
-				if(user.getId()==contact.getUser().getId())
-					{model.addAttribute("contact",contact);//send contact to client page
-					}
-
+				ContactDTO contact =	contactService.getContactForUser(Cid,principal.getName());
+				model.addAttribute("contact",contact);
 				return "normal/contact_detail";
 			}
 			
@@ -240,55 +230,35 @@ public class UserController {
 				return"redirect:/user/show_contact/0";
 			}
 
-		//handler for update form
-			@PostMapping("/update_contact/{Cid}")
-			public String updateForm(@PathVariable("Cid")Integer Cid,Model model) {
+			/*handler for update form*/
+			@GetMapping("/update_contact/{id}")
+			public String showUpdateForm(@PathVariable Integer id, Model model) {
 				model.addAttribute("tittle", "update_contact");
-				//find contact and send to html(view) resolver
-				  Contact contact = this.contactRepository.findById(Cid).get();
-				  model.addAttribute("contact",contact);
-				  
+				model.addAttribute("contact", contactService.getContactById(id));
 				return "normal/update_form";
 			}
-			
-			
-			//handler for update contact--image store in multipartfile and contact data store in Contact variable
+
+			/*handler for update contact
+			* image store in multipart file
+			* contact data store in Contact variable
+			* */
 			@PostMapping("/process-update")
-			public String updateHandler(@ModelAttribute Contact contact,@RequestParam("profileImage")MultipartFile file,HttpSession session,Model model,Principal principal) {
-//				System.out.println("contact_name:"+contact.getName());
-//				System.out.println("contact_Id:"+contact.getCid());
-				
+			public String updateContact(@ModelAttribute Contact contact,@RequestParam("profileImage")MultipartFile file,HttpSession session,Model model,Principal principal) {
 				try {
-					
-					//old contact details
-					Contact oldContactDetails = this.contactRepository.findById(contact.getCid()).get();
-			
-					
-					//update image 
-					//if file is not empty!
+					ContactDTO oldContactDetails = contactService.getContactById(contact.getCid());
 					if(!file.isEmpty()) {
-					    //perform your activity	
-						
 						//delete old photo
-						File deleteFile = new ClassPathResource("static/Image").getFile();
-						File file2 = new File(deleteFile,oldContactDetails.getImage());
-						file2.delete();
-						
+						contactService.deleteImage(oldContactDetails.getImage());
 						//update new photo
-						File saveFile = new ClassPathResource("static/Image").getFile();
-						Path path = Paths.get(saveFile.getAbsolutePath()+File.separator, file.getOriginalFilename());
-						Files.copy(file.getInputStream(), path,StandardCopyOption.REPLACE_EXISTING);
+						String imageName = contactService.uploadImage(file);
 						contact.setImage(file.getOriginalFilename());
-					
 					}else {
-						//if file empty(mtlb user koi image nhi set karna chatta)then no need to update image, sent old data as it as
 						contact.setImage(oldContactDetails.getImage());
 					}
-					//get id and update that id as well
+
 					User user = this.userRepository.getUserByUserName(principal.getName())
 							.orElseThrow(()-> new RuntimeException("User Not Found"));
 					contact.setUser(user);
-					//save the update
 					this.contactRepository.save(contact);
 					session.setAttribute("message", new Message("your contact is updated", "success"));
 				} catch (Exception e) {
