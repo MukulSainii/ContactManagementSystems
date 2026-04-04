@@ -75,22 +75,16 @@ public class ContactServiceImpl implements ContactService {
 
     @Override
     public void deleteImage(String fileName) {
-        System.out.println("Step 4");
         try{
             if (fileName == null) {
                 logger.error("File deletion failed Due to file null!");
                 throw new FileValidationException("File name cannot be null");
             }
-            System.out.println("\n out reach 1 : " +fileName+", the upload directory :"+uploadDir);
             Path path = Paths.get(uploadDir,fileName);
-            System.out.println("\n out reach 1 : " +path);
             if (!"default.png".equals(fileName)) {
-                System.out.println("\n out reach 1 : ");
                 Files.deleteIfExists(path);
             }
         }catch (Exception e){
-            System.out.println("Step 5");
-            e.printStackTrace();
             logger.error("File deletion failed for file: {}", fileName, e);
             throw new FileValidationException("Unable to upload file. Please try again later.", e);
         }
