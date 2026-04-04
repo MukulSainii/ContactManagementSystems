@@ -9,4 +9,5 @@ public interface ContactService  {
     public ContactDTO getContactById(Integer id);
     public String  uploadImage(MultipartFile file);
     public void deleteImage(String image);
+    public void validateFile(MultipartFile file);
 }

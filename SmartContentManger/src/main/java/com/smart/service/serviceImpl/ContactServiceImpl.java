@@ -19,11 +19,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @RequiredArgsConstructor
 public class ContactServiceImpl implements ContactService {
+    private static final Logger logger = LoggerFactory.getLogger(ContactServiceImpl.class);
     @Value("${file.upload-dir}")
     private String uploadDir;
     private final ContactRepository contactRepository;
@@ -54,6 +58,7 @@ public class ContactServiceImpl implements ContactService {
             throw new FileValidationException("File cannot be null");
         }
         try {
+            validateFile(file);
             File dir = new File(uploadDir);
             if (!dir.exists()) {
                 dir.mkdirs();
@@ -62,8 +67,9 @@ public class ContactServiceImpl implements ContactService {
             Path path  = Paths.get(uploadDir,filename);
             Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
             return filename;
-        }catch(IOException e){
-            throw new RuntimeException("Image upload failed", e);
+        }catch(Exception e){
+            logger.error("File upload failed for file: {}", file.getOriginalFilename(), e);
+            throw new FileValidationException("Image upload failed", e);
         }
     }
 
@@ -71,14 +77,27 @@ public class ContactServiceImpl implements ContactService {
     public void deleteImage(String fileName) {
         try{
             if (fileName == null) {
+                logger.error("File deletion failed Due to file null!");
                 throw new FileValidationException("File name cannot be null");
             }
             Path path = Paths.get(uploadDir,fileName);
-            if (!fileName.equals("default.png")) {
+            if (!"default.png".equals(fileName)) {
                 Files.deleteIfExists(path);
             }
-        }catch (IOException e){
-            throw new RuntimeException("deletion file failed",e);
+        }catch (Exception e){
+            logger.error("File deletion failed for file: {}", fileName, e);
+            throw new FileValidationException("Unable to upload file. Please try again later.", e);
+        }
+    }
+
+    @Override
+    public void validateFile(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new FileValidationException("File is empty");
+        }
+        List<String> allowedTypes = List.of("image/jpeg", "image/png");
+        if (!allowedTypes.contains(file.getContentType())) {
+            throw new FileValidationException("Only JPG and PNG allowed");
         }
     }
 
