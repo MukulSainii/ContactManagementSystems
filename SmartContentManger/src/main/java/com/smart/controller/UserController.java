@@ -18,6 +18,7 @@ import com.smart.enums.ContactCategory;
 import com.smart.helper.SecurityUtils;
 import com.smart.service.ContactService;
 import com.smart.service.UserService;
+import com.smart.service.serviceImpl.ContactServiceImpl;
 import jakarta.validation.Valid;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -244,14 +245,11 @@ public class UserController {
 			* */
 			@PostMapping("/process-update")
 			public String updateContact(@ModelAttribute Contact contact,@RequestParam("profileImage")MultipartFile file,HttpSession session,Model model,Principal principal) {
-				try {
 					ContactDTO oldContactDetails = contactService.getContactById(contact.getCid());
 					if(!file.isEmpty()) {
-						//delete old photo
 						contactService.deleteImage(oldContactDetails.getImage());
-						//update new photo
 						String imageName = contactService.uploadImage(file);
-						contact.setImage(file.getOriginalFilename());
+						contact.setImage(imageName);
 					}else {
 						contact.setImage(oldContactDetails.getImage());
 					}
@@ -261,9 +259,6 @@ public class UserController {
 					contact.setUser(user);
 					this.contactRepository.save(contact);
 					session.setAttribute("message", new Message("your contact is updated", "success"));
-				} catch (Exception e) {
-                      e.printStackTrace();
-				}
 				return "redirect:/user/contact/"+contact.getCid();
 			}
 			
