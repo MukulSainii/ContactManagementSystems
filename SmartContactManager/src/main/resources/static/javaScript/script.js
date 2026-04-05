@@ -1,4 +1,3 @@
-console.log("this is script file");
 //coding for side bar 
 const toggleSidebar=()=>{
       if($('.sidebar').is(":visible")){
@@ -12,38 +11,64 @@ const toggleSidebar=()=>{
       }
 };
 
+let timeout = null;
 
-const search=()=>{
-    let query=$("#search-input").val();
-    if (!query) {
-      $(".search-result").hide();
-      return; // Exit the function if query is undefined or empty
-  }else{
-      //search
-      console.log(query);
-     //sending request to server
-     let url=`http://localhost:8080/search/${query}`;
-        fetch(url)
-        .then((response)=>{
-          return response.json();
-        })
-        .then((data)=>{
-          //data
-          //console.log(data);
+const search = () => {
+  let query = $("#search-input").val().trim();
 
-          let text=`<div class='list-group'>`;
-              data.forEach((contact)=>{
-                text+=`<a href='/user/contact/${contact.Cid}' class='list-group-item list-group-item-action'>${contact.name} </a>`
-              });
-          text+=`</div>`;
-          $(".search-result").html(text);
-          $(".search-result").show();
+  // Clear previous timeout (Debounce)
+  if (timeout) {
+    clearTimeout(timeout);
+  }
 
+  // If empty → hide results
+  if (!query) {
+    $(".search-result").hide();
+    return;
+  }
+
+  // Delay API call (300ms debounce)
+  timeout = setTimeout(() => {
+    let url = `http://localhost:8080/search/${query}`;
+
+    // Show loading
+    $(".search-result").html("<div class='list-group-item'>Loading...</div>").show();
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+
+        // No result case
+        if (data.length === 0) {
+          $(".search-result").html(
+            "<div class='list-group-item'>No results found</div>"
+          );
+          return;
+        }
+
+        let text = `<div class='list-group'>`;
+
+        data.forEach(contact => {
+          text += `
+            <a href='/user/contact/${contact.cid}' 
+               class='list-group-item list-group-item-action'>
+               ${contact.name}
+            </a>`;
         });
 
-      $(".search-result").show();
-     }
-  };
+        text += `</div>`;
+
+        $(".search-result").html(text).show();
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        $(".search-result").html(
+          "<div class='list-group-item text-danger'>Something went wrong</div>"
+        );
+      });
+
+  }, 300); // ⏳ debounce delay
+};
 
   //first request to create order
   const paymentStart=()=>{

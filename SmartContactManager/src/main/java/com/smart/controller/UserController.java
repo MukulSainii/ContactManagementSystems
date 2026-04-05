@@ -18,7 +18,6 @@ import com.smart.enums.ContactCategory;
 import com.smart.helper.SecurityUtils;
 import com.smart.service.ContactService;
 import com.smart.service.UserService;
-import com.smart.service.serviceImpl.ContactServiceImpl;
 import jakarta.validation.Valid;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
