@@ -38,7 +38,7 @@
 					      <th scope="row" th:text="${'SCM2020'+c.Cid}">1</th>
 					      <!--show image from folder to client on server-->
 					      <td >
-							  <img src="" class="my_profile_picture" th:src="@{'/Image/'+${c.image}}" alt="profile photo"/>
+							  <img src="" class="my_profile_picture" th:src="${c.image != null} ? @{'/Image/' + ${c.image}} : @{/Image/contact.png}" alt="profile photo"/>
 							  <span th:text="${c.name + (#strings.isEmpty(c.secondname) ? '' : ' ' + c.secondname)}"></span>
 						  </td>
 					      <td >
