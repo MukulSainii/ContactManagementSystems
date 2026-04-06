@@ -128,6 +128,11 @@ public class User {
 //	}
 //    
 
+
+public void addContact(Contact contact) {
+    contacts.add(contact);
+    contact.setUser(this);
+}
 	
 	
 	 

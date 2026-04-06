@@ -1,7 +1,6 @@
 package com.smart.service;
 
 import com.smart.DTO.ContactDTO;
-import com.smart.entities.Contact;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface ContactService  {
@@ -10,4 +9,5 @@ public interface ContactService  {
     public String  uploadImage(MultipartFile file);
     public void deleteImage(String image);
     public void validateFile(MultipartFile file);
+    public void saveContact(ContactDTO contactDto, String username);
 }

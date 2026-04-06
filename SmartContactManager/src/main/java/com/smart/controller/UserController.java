@@ -87,8 +87,8 @@ public class UserController {
 	
 	
 	//dashBoard handler
-	@RequestMapping("/index")
-    public String dashBoard(Model model,Principal principal) {
+	@GetMapping("/index")
+    public String dashBoard(Model model) {
 		model.addAttribute("title","User home(DashBoard)");
 		return "normal/user_dashboard";
     }
@@ -96,68 +96,41 @@ public class UserController {
 	// Add_contact Form handler
 	@GetMapping("/addContact")
 	public String AddContactForm(Model model) {
-		
-		//this title show on page tab above on url
 		model.addAttribute("title","Add Contact"); 
-		
-		// this contact object send to addContact.html page form tag (th:object)
 		model.addAttribute("contactDTO",new ContactDTO());
 		model.addAttribute("contactTypes", ContactCategory.values());
 		return "normal/addContact";
 	}
 	
 	
-	/**processing contact form,after adding successfully again show addContact.html page for add another contact */
+	/**handler for adding new contact,
+	 * if Image present upload into system and store name into db
+	 * add contact info into database along with user
+	 * after adding successfully again show addContact.html page for add another contact */
 	@PostMapping("/process-contact")
-	public String  processContact(@Valid @ModelAttribute ContactDTO contactDto, BindingResult result,                        //form ke ander jo field h uska sara data contact variable me aa jayga
-								  @RequestParam("profileImage")MultipartFile file  ,     //for store the file which client upload on server(addContact.html)
-								  Principal principal,
+	public String  processContact(@Valid @ModelAttribute ContactDTO contactDto, BindingResult result,
+								  @RequestParam("profileImage")MultipartFile file,Principal principal,
 								  HttpSession session,RedirectAttributes redirectAttributes,Model model
 	) {
 		try {
-			//user ka data DataBase me save karne ke liye phle user chayye hoga jo login h 
-			//use nikalne ke liye security se principal class hamri help karti h
-			//ye user ka unique id nikal ke de dega
 			if(result.hasErrors()){
-//				redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
-				System.out.println("binding result : "+result);
 				model.addAttribute("contactTypes", ContactCategory.values());
 				return "normal/addContact";
 			}
-			String name=principal.getName();
-			
-			//on this method we write query for fetching data from DB of give unique id,all data store in user
-			User user=this.userRepository.getUserByUserName(name)
-					.orElseThrow(() -> new RuntimeException("User not found"));
 			//processing the image
-			  if(file.isEmpty()) {
-				  //if file is empty then print message 
-				  System.out.println("file i empty");
-				  contactDto.setImage("contact.png");
-			  }else {
-				//otherwise store the file in folder and update its url in database
-				  contactDto.setImage(file.getOriginalFilename());
-				  
-				  //this  class save file in given folder
-				  File sfile = new ClassPathResource("static/Image").getFile();
-				  
-				  Path path = Paths.get(sfile.getAbsolutePath()+File.separator+file.getOriginalFilename()); //here you can add date also for unique name of file every time ,even the same image
-
-//				  Files.copy(pathSource, pathTarget, copyOption)--this method upload image in DataBAse
-				  Files.copy(file.getInputStream(), path,StandardCopyOption.REPLACE_EXISTING);
-				  System.out.println("image upload successfully");
+			if(!file.isEmpty()) {
+				String fileName = contactService.uploadImage(file);
+				contactDto.setImage(fileName);
 			}
+            contactService.saveContact(contactDto, principal.getName());
+			// contactDto.setUser(user);
+			// System.out.println("contact DTO_to_entity : "+contactMapper.toEntity(contactDto));
+			// //getContects method give list of all contact ,and add method add this contact to this user
+			// user.getContacts().add(contactMapper.toEntity(contactDto));
 			
-			
-			//by-directional mapping h to contact bhi save karna hoga
-			contactDto.setUser(user);
-			System.out.println("contact DTO_to_entity : "+contactMapper.toEntity(contactDto));
-			//getContects method give list of all contact ,and add method add this contact to this user
-			user.getContacts().add(contactMapper.toEntity(contactDto));
-			
-			//save this user in database
-			this.userRepository.save(user);
-			System.out.println("DATA :" +contactDto);
+			// //save this user in database
+			// this.userRepository.save(user);
+			// System.out.println("DATA :" +contactDto);
 			//success message 
 			session.setAttribute("message",  new Message("your contact is added!! Add more ..","success"));
 		} catch (Exception e) {
