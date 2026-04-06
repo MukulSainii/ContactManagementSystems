@@ -33,6 +33,7 @@ public class ContactServiceImpl implements ContactService {
     private final ContactRepository contactRepository;
     private final UserRepository userRepository;
     private final ContactMapper contactMapper;
+
     @Override
     public ContactDTO getContactForUser(Integer contactId, String username) {
         Contact contact = contactRepository.findById(contactId)
@@ -99,6 +100,16 @@ public class ContactServiceImpl implements ContactService {
         if (!allowedTypes.contains(file.getContentType())) {
             throw new FileValidationException("Only JPG and PNG allowed");
         }
+    }
+
+    @Override
+    public void saveContact(ContactDTO contactDto, String username) {
+        User user = userRepository.getUserByUserName(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+          
+        Contact contact = contactMapper.toEntity(contactDto);
+        contact.setUser(user);
+        contactRepository.save(contact);
     }
 
 
