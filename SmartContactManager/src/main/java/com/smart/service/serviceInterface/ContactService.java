@@ -1,4 +1,4 @@
-package com.smart.service;
+package com.smart.service.serviceInterface;
 
 import com.smart.DTO.ContactDTO;
 import org.springframework.web.multipart.MultipartFile;

@@ -1,11 +1,7 @@
 package com.smart.controller;
 
-import java.io.File;
 import com.razorpay.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+
 import java.security.Principal;
 import java.util.Map;
 import java.util.Optional;
@@ -16,12 +12,11 @@ import com.smart.DTO.mapper.ContactMapper;
 import com.smart.DTO.mapper.UserMapper;
 import com.smart.enums.ContactCategory;
 import com.smart.helper.SecurityUtils;
-import com.smart.service.ContactService;
-import com.smart.service.UserService;
+import com.smart.service.serviceInterface.ContactService;
+import com.smart.service.serviceInterface.UserService;
 import jakarta.validation.Valid;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -153,10 +148,11 @@ public class UserController {
 				return "normal/contact_detail";
 			}
 			
-	//handler for delete contact
+	       //handler for delete contact
 			@GetMapping("/delete/{Cid}")
 			public String deleteContact(@PathVariable("Cid") Integer Cid,Model model,HttpSession session,Principal principal) {
 				//find user through id from url in data database by fire query
+
 				Optional<Contact> contactOptional = this.contactRepository.findById(Cid);
 				    System.out.println(Cid);
 				if (contactOptional.isPresent()) {
