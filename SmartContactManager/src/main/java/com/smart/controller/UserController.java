@@ -149,37 +149,10 @@ public class UserController {
 			}
 			
 	       //handler for delete contact
-			@GetMapping("/delete/{Cid}")
+		   @PostMapping("/delete/{Cid}")
 			public String deleteContact(@PathVariable("Cid") Integer Cid,Model model,HttpSession session,Principal principal) {
-				//find user through id from url in data database by fire query
-
-				Optional<Contact> contactOptional = this.contactRepository.findById(Cid);
-				    System.out.println(Cid);
-				if (contactOptional.isPresent()) {
-
-					Contact contact = contactOptional.get();
-					
-//					//unlink user from contact
-//					contact.setUser(null);
-//					System.out.println("contact:"+contact);
-//					
-//					//delete contact
-//					this.contactRepository.delete(contact);
-					
-					//removing bug from delete contact
-					  User user = this.userRepository.getUserByUserName(principal.getName())
-							  .orElseThrow(()-> new RuntimeException("User Not Found"));
-					   user.getContacts().remove(contact);  //is contact ki id se jo contact match kar jayga from contacts use remove kar dega ye method
-					   this.userRepository.save(user);
-					
-					
-					    System.out.println("delete successfully");
-					//send success message to user through session
-					session.setAttribute("message",new Message("contact delete successfully..!!","success"));
-				} else {
-				    // Handle the case where the contact with the given ID was not found
-					System.out.println("given id is not found!!");
-				}
+			   contactService.deleteContact(Cid, principal.getName());
+			   session.setAttribute("message",new Message("contact delete successfully..!!","success"));
 				return"redirect:/user/show_contact/0";
 			}
 

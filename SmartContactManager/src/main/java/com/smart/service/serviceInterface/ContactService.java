@@ -10,4 +10,5 @@ public interface ContactService  {
     public void deleteImage(String image);
     public void validateFile(MultipartFile file);
     public void saveContact(ContactDTO contactDto, String username);
+    public void deleteContact(Integer cid, String username);
 }

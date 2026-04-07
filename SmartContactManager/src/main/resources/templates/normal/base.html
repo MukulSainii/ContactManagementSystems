@@ -92,23 +92,28 @@
     <!--sweet alert (js.org)-->
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script>
-		function deleteContact(Cid){
-			swal({
-				  title: "Are you sure?",
-				  text: "you want to delete this contact!",
-				  icon: "warning",
-				  buttons: true,
-				  dangerMode: true,
-				})
-				.then((willDelete) => {
-				  if (willDelete) {
-				      window.location="/user/delete/"+Cid;
-				  } else {
-				    swal("Your contact is safe!");
-				  }
-				});
-		}
 
+
+        function confirmDelete(event) {
+          event.preventDefault(); // 💥 stop form submission
+          let form = event.target; // current form
+          swal({
+            title: "Are you sure?",
+            text: "You want to delete this contact!",
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+          })
+          .then((willDelete) => {
+            if (willDelete) {
+              form.submit(); // 💥 now submit form manually
+            } else {
+              swal("Your contact is safe!");
+            }
+          });
+
+          return false; // extra safety
+        }
 		//hide session message after 5 sec
 		setTimeout(function () {
             let msg = document.getElementById("flashMessage");

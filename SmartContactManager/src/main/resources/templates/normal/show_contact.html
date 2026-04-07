@@ -51,7 +51,12 @@
 							 <a  th:href="@{'/user/update_contact/'+${c.Cid}}"
    							    class="btn btn-primary btn-sm">Update
 							 </a>
-				             <a  href="#" th:onclick="|deleteContact(${c.Cid})|" class="btn btn-danger btn-sm mb-1" style="margin-top: 5px;">Delete</a>
+<!--				             <a  href="#" th:onclick="|deleteContact(${c.Cid})|" class="btn btn-danger btn-sm mb-1" style="margin-top: 5px;">Delete</a>-->
+							  <form th:action="@{/user/delete/{id}(id=${c.Cid})}" method="post" onsubmit="return confirmDelete(event)">
+								  <button type="submit" class="btn btn-danger btn-sm mb-1 custom-pr">
+									  Delete
+								  </button>
+							  </form>
 						  </td>
 					    </tr>
 					  

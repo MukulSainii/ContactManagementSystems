@@ -2,6 +2,7 @@ package com.smart.service.serviceImpl;
 
 import com.smart.DTO.ContactDTO;
 import com.smart.DTO.mapper.ContactMapper;
+import com.smart.Exception.CustomException;
 import com.smart.Exception.FileValidationException;
 import com.smart.dao.ContactRepository;
 import com.smart.dao.UserRepository;
@@ -109,6 +110,19 @@ public class ContactServiceImpl implements ContactService {
         Contact contact = contactMapper.toEntity(contactDto);
         user.addContact(contact);
         userRepository.save(user);
+    }
+
+    @Override
+    public void deleteContact(Integer cid, String username) {
+       User user = userRepository.getUserByUserName(username)
+                .orElseThrow(()-> new CustomException("user not found","Deletion failed, Try Again "));
+       Contact contact =  contactRepository.findById(cid)
+               .orElseThrow(()-> new RuntimeException("contact not found"));
+       if(user.getId() != contact.getUser().getId()){
+           throw new CustomException("unauthorized", "/user/show_contact/0");
+       }
+       user.getContacts().remove(contact);
+       userRepository.save(user);
     }
 
 
