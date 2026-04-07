@@ -15,7 +15,7 @@
 				<div class="container-fluid mt-1">
 					<div class="col-md-10 offset-md-1">
 						<!--action=jha form bhejna h, enctype=image store karne ke liye,contact class ka object jo ki controller se aayega-->
-						<form action="" th:action="@{/user/process-update}" method="post"
+						<form action="" th:action="@{/user/update_contact}" method="post"
 								        th:object="${contact}" enctype="multipart/form-data"
 								        class="mt-2">
 								<input type="hidden" th:value="${contact.Cid}" name="Cid"/>        
@@ -72,8 +72,27 @@
 										</div>
 									</div>
 									<input th:value="${contact.email}" required  type="email" id="email"name="email" placeholder="Enter email here" class="form-control">
-								</div>        
-							
+								</div>
+							<!--type of contact-->
+								<div class="input-group mt-3">
+									<div class="input-group-prepend">
+										<div class="input-group-text mr-3">
+											<i class="fas fa-user-tag fa-sm"></i>
+										</div>
+									</div>
+
+									<select th:field="*{category}" class="form-control">
+										<option value=""> Select Contact Type </option>
+										<option th:each="type : ${contactTypes}"
+												th:value="${type}"
+												th:text="${type.label}">
+										</option>
+									</select>
+								</div>
+								<span th:if="${#fields.hasErrors('category')}"
+									  th:errors="*{category}"
+									  style="color:red">
+								</span>
 								<!--work field-->
 								<div class="input-group mt-3">
 									<div class="input-group-prepend">

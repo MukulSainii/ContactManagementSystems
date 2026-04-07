@@ -44,7 +44,7 @@
 					    </tr>
 						<tr>
 							<th scope="row">category</th>
-							<td><span th:text="${contact.category ?: 'not available'}"></span></td>
+							<td><span th:text="${contact.category != null ? contact.category.label : 'not available'}"></span></td>
 						</tr>
 					  </tbody>
 					</table>

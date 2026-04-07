@@ -95,7 +95,7 @@ public class UserController {
 	
 	// Add_contact Form handler
 	@GetMapping("/addContact")
-	public String AddContactForm(Model model) {
+	public String showingAddContactForm(Model model) {
 		model.addAttribute("title","Add Contact"); 
 		model.addAttribute("contactDTO",new ContactDTO());
 		model.addAttribute("contactTypes", ContactCategory.values());
@@ -107,38 +107,22 @@ public class UserController {
 	 * if Image present upload into system and store name into db
 	 * add contact info into database along with user
 	 * after adding successfully again show addContact.html page for add another contact */
-	@PostMapping("/process-contact")
-	public String  processContact(@Valid @ModelAttribute ContactDTO contactDto, BindingResult result,
+	@PostMapping("/addContact")
+	public String addContact(@Valid @ModelAttribute ContactDTO contactDto, BindingResult result,
 								  @RequestParam("profileImage")MultipartFile file,Principal principal,
-								  HttpSession session,RedirectAttributes redirectAttributes,Model model
+								  HttpSession session,Model model
 	) {
-		try {
-			if(result.hasErrors()){
-				model.addAttribute("contactTypes", ContactCategory.values());
-				return "normal/addContact";
-			}
-			//processing the image
-			if(!file.isEmpty()) {
-				String fileName = contactService.uploadImage(file);
-				contactDto.setImage(fileName);
-			}
-            contactService.saveContact(contactDto, principal.getName());
-			// contactDto.setUser(user);
-			// System.out.println("contact DTO_to_entity : "+contactMapper.toEntity(contactDto));
-			// //getContects method give list of all contact ,and add method add this contact to this user
-			// user.getContacts().add(contactMapper.toEntity(contactDto));
-			
-			// //save this user in database
-			// this.userRepository.save(user);
-			// System.out.println("DATA :" +contactDto);
-			//success message 
-			session.setAttribute("message",  new Message("your contact is added!! Add more ..","success"));
-		} catch (Exception e) {
-			System.out.println("ERROR:" + e.getMessage());
-			e.printStackTrace();
-			//failure message 
-			session.setAttribute("message", new Message("Somthing went wrong!! ", "danger"));
+		if(result.hasErrors()){
+			model.addAttribute("contactTypes", ContactCategory.values());
+			return "normal/addContact";
 		}
+		//processing the image
+		if(!file.isEmpty()) {
+			String fileName = contactService.uploadImage(file);
+			contactDto.setImage(fileName);
+		}
+		contactService.saveContact(contactDto, principal.getName());
+		session.setAttribute("message",  new Message("your contact is added!! Add more ..","success"));
 		return "redirect:/user/addContact";
 	}
 	
@@ -205,9 +189,10 @@ public class UserController {
 
 			/*handler for update form*/
 			@GetMapping("/update_contact/{id}")
-			public String showUpdateForm(@PathVariable Integer id, Model model) {
+			public String showUpdateContactForm(@PathVariable Integer id, Model model) {
 				model.addAttribute("tittle", "update_contact");
 				model.addAttribute("contact", contactService.getContactById(id));
+				model.addAttribute("contactTypes", ContactCategory.values());
 				return "normal/update_form";
 			}
 
@@ -215,7 +200,7 @@ public class UserController {
 			* image store in multipart file
 			* contact data store in Contact variable
 			* */
-			@PostMapping("/process-update")
+			@PostMapping("/update_contact")
 			public String updateContact(@ModelAttribute Contact contact,@RequestParam("profileImage")MultipartFile file,HttpSession session,Model model,Principal principal) {
 					ContactDTO oldContactDetails = contactService.getContactById(contact.getCid());
 					if(!file.isEmpty()) {
