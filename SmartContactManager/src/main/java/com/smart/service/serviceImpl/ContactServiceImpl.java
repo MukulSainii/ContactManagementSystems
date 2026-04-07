@@ -108,8 +108,8 @@ public class ContactServiceImpl implements ContactService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
           
         Contact contact = contactMapper.toEntity(contactDto);
-        contact.setUser(user);
-        contactRepository.save(contact);
+        user.addContact(contact);
+        userRepository.save(user);
     }
 
 
