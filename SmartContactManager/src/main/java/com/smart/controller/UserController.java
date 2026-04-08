@@ -1,71 +1,46 @@
 package com.smart.controller;
 
-import com.razorpay.*;
-
-import java.security.Principal;
-import java.util.Map;
-import java.util.Optional;
-
+import com.razorpay.Order;
+import com.razorpay.RazorpayClient;
 import com.smart.DTO.ContactDTO;
 import com.smart.DTO.UserDTO;
-import com.smart.DTO.mapper.ContactMapper;
 import com.smart.DTO.mapper.UserMapper;
+import com.smart.dao.MyOrderRepository;
+import com.smart.dao.UserRepository;
+import com.smart.entities.MyOrder;
+import com.smart.entities.User;
 import com.smart.enums.ContactCategory;
+import com.smart.helper.ImageUtil;
+import com.smart.helper.Message;
 import com.smart.helper.SecurityUtils;
 import com.smart.service.serviceInterface.ContactService;
 import com.smart.service.serviceInterface.UserService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.smart.dao.ContactRepository;
-import com.smart.dao.MyOrderRepository;
-import com.smart.dao.UserRepository;
-import com.smart.entities.Contact;
-import com.smart.entities.MyOrder;
-import com.smart.entities.User;
-import com.smart.helper.Message;
+import java.security.Principal;
+import java.util.Map;
 
-import jakarta.servlet.http.HttpSession;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+@RequiredArgsConstructor
 @Controller
 @RequestMapping("/user")
 public class UserController {
-	@Autowired
-	private BCryptPasswordEncoder bCryptPasswordEncoder;
-	@Autowired
-	private UserRepository userRepository;
-	@Autowired
-	private ContactRepository contactRepository;
-	@Autowired
-	private MyOrderRepository myOrderRepository;
-	@Autowired
-	private UserMapper userMapper;
-	@Autowired
-	private ContactMapper contactMapper;
-	@Autowired
-	private ContactService contactService;
-
-	@Autowired
-	private UserService userService;
+	private final BCryptPasswordEncoder bCryptPasswordEncoder;
+	private final UserRepository userRepository;
+	private final MyOrderRepository myOrderRepository;
+	private final UserMapper userMapper;
+	private final ContactService contactService;
+	private final UserService userService;
 
 	
   /*
@@ -113,203 +88,158 @@ public class UserController {
 		}
 		//processing the image
 		if(!file.isEmpty()) {
-			String fileName = contactService.uploadImage(file);
+			String fileName = ImageUtil.uploadImage(file);
 			contactDto.setImage(fileName);
 		}
 		contactService.saveContact(contactDto, principal.getName());
 		session.setAttribute("message",  new Message("your contact is added!! Add more ..","success"));
 		return "redirect:/user/addContact";
 	}
+
+	/*
+	* Handler for showing contact listing with pagination
+	* using Offset and limit
+	* page variable holding current page value*/
+	@GetMapping("/show_contact/{page}")
+	public String showContact(@PathVariable("page") Integer page,Model model,Principal principal) {
+		Page<ContactDTO> contacts = contactService.getContacts(page,principal.getName());
+		model.addAttribute("currentPage",page);
+		model.addAttribute("contacts",contacts);
+		model.addAttribute("totalPages",contacts.getTotalPages());
+		return "normal/show_contact";
+	}
 	
-	     //show contact handler
-         //per page5[n]-where n is no. of page
-	     //current page=[0]
-			@GetMapping("/show_contact/{page}")
-			public String showContact(@PathVariable("page") Integer page,Model model,Principal principal) {
-				String userUniqueId=principal.getName();   //this get email of user  from database through which user is login
-				User user = this.userRepository.getUserByUserName(userUniqueId)
-						 .orElseThrow(()-> new RuntimeException("User Not Found"));// repository fire query and get all detail of user of this email
-				
-				//page  no. ,page size
-				Pageable pageable = PageRequest.of(page,5);
-				
-				Page contacts = (Page) this.contactRepository.findContactsByUser(user.getId(),pageable);// this repository fire query and get all contacts of given id from dataBase
-				model.addAttribute("contacts",contacts); // this send data to view page 
-				model.addAttribute("currentPage",page); // this send data to view page 
-				model.addAttribute("totalPages",contacts.getTotalPages()); // this send data to view page 
-				return "normal/show_contact";
-			}
-	
-            /* Handler for show particular contact details */
-			@GetMapping("/contact/{Cid}")
-			public String showContactDetails(@PathVariable("Cid")Integer Cid,Model model,Principal principal) {
-				ContactDTO contact =	contactService.getContactForUser(Cid,principal.getName());
-				model.addAttribute("contact",contact);
-				return "normal/contact_detail";
-			}
-			
-	       //handler for delete contact
-		   @PostMapping("/delete/{Cid}")
-			public String deleteContact(@PathVariable("Cid") Integer Cid,Model model,HttpSession session,Principal principal) {
-			   contactService.deleteContact(Cid, principal.getName());
-			   session.setAttribute("message",new Message("contact delete successfully..!!","success"));
-				return"redirect:/user/show_contact/0";
-			}
+	/* Handler for show particular contact details */
+	@GetMapping("/contact/{Cid}")
+	public String showContactDetails(@PathVariable("Cid")Integer Cid,Model model,Principal principal) {
+		ContactDTO contact =	contactService.getContactForUser(Cid,principal.getName());
+		model.addAttribute("contact",contact);
+		return "normal/contact_detail";
+	}
 
-			/*handler for update form*/
-			@GetMapping("/update_contact/{id}")
-			public String showUpdateContactForm(@PathVariable Integer id, Model model) {
-				model.addAttribute("tittle", "update_contact");
-				model.addAttribute("contact", contactService.getContactById(id));
-				model.addAttribute("contactTypes", ContactCategory.values());
-				return "normal/update_form";
-			}
+   //handler for delete contact
+   @PostMapping("/delete/{Cid}")
+	public String deleteContact(@PathVariable("Cid") Integer Cid,Model model,HttpSession session,Principal principal) {
+	   contactService.deleteContact(Cid, principal.getName());
+	   session.setAttribute("message",new Message("contact delete successfully..!!","success"));
+		return"redirect:/user/show_contact/0";
+	}
 
-			/*handler for update contact
-			* image store in multipart file
-			* contact data store in Contact variable
-			* */
-			@PostMapping("/update_contact")
-			public String updateContact(@ModelAttribute Contact contact,@RequestParam("profileImage")MultipartFile file,HttpSession session,Model model,Principal principal) {
-					ContactDTO oldContactDetails = contactService.getContactById(contact.getCid());
-					if(!file.isEmpty()) {
-						contactService.deleteImage(oldContactDetails.getImage());
-						String imageName = contactService.uploadImage(file);
-						contact.setImage(imageName);
-					}else {
-						contact.setImage(oldContactDetails.getImage());
-					}
+	/*handler for update form*/
+	@GetMapping("/update_contact/{id}")
+	public String showUpdateContactForm(@PathVariable Integer id, Model model) {
+		model.addAttribute("tittle", "update_contact");
+		model.addAttribute("contact", contactService.getContactById(id));
+		model.addAttribute("contactTypes", ContactCategory.values());
+		return "normal/update_form";
+	}
 
-					User user = this.userRepository.getUserByUserName(principal.getName())
-							.orElseThrow(()-> new RuntimeException("User Not Found"));
-					contact.setUser(user);
-					this.contactRepository.save(contact);
-					session.setAttribute("message", new Message("your contact is updated", "success"));
-				return "redirect:/user/contact/"+contact.getCid();
+	/*handler for update contact
+	* image store in multipart file
+	* contact data store in Contact variable
+	* */
+	@PostMapping("/update_contact")
+	public String updateContact(@ModelAttribute ContactDTO contactDTO,@RequestParam("profileImage")MultipartFile file,HttpSession session,Model model,Principal principal) {
+		String imageName ;
+		ContactDTO oldContactDetails = contactService.getContactById(contactDTO.getCid());
+			if(!file.isEmpty()) {
+				ImageUtil.deleteImage(oldContactDetails.getImage());
+				imageName = ImageUtil.uploadImage(file);
+			}else {
+				imageName = oldContactDetails.getImage();
 			}
-			
-			
-			//handler for profile
-			@GetMapping("/profile")
-			public String yourProfile(Model model) {
-//				if (!model.containsAttribute("profileForm")) {
-//					User currentUser = (User) model.asMap().get("user"); // already set by addCommonData
-//					model.addAttribute("profileForm", currentUser);
-//				}
-				return "normal/profile";
-			}
-			
-			//open setting handler
-			@GetMapping("/setting")
-			public String openSetting() {
-				return "normal/setting";
-			}
-			
-			//change password handler
-			@PostMapping("/changePassword")
-			public String changePassword(@RequestParam("oldPassword")String oldPassword,@RequestParam("newPassword")String newPassword,Principal principal,HttpSession session) {
-				System.out.println("Old Password :-"+oldPassword);
-				System.out.println("new Password :-"+newPassword);
-				User currentUser = this.userRepository.getUserByUserName(principal.getName())
-						.orElseThrow(()-> new RuntimeException("User Not Found"));
-				if(this.bCryptPasswordEncoder.matches(oldPassword, currentUser.getPassword())) {
-					//change password
-					currentUser.setPassword(this.bCryptPasswordEncoder.encode(newPassword));
-					this.userRepository.save(currentUser);
-					session.setAttribute("message", new Message("your password successfully change", "success"));
-				}
-				else {
-					//error
-					session.setAttribute("message", new Message("your old password is not match", "danger"));
-					return "redirect:/user/setting";
-					
-				}
-				return "redirect:/user/index";
-				
-				
-			}
-			
-			//handler for first time create order for payment
-			@PostMapping("/create_order")
-			@ResponseBody
-			public String createOrder(@RequestBody Map<String, Object>data,Principal principal) throws Exception {
-				System.out.println("order function executed");
-				System.out.println(data);
-				int amt=Integer.parseInt(data.get("amount").toString());
-				System.out.println("amt is : "+amt);
-				//create client(key,secret) ==from rozarpay site which we generate
-				 var client= new RazorpayClient("rzp_test_aetInMhOh05zJ3", "3XoB97MoSvRzLHjcmf7zTTFN");
-				 //creating order
-				 JSONObject object=new JSONObject();
-				 object.put("amount", amt*100);//our amount in rupees ,but we have convert it into paise
-				 object.put("currency", "INR");
-				 object.put("receipt", "txn_23456");
-				
-				 Order order = client.orders.create(object);
-				 System.out.println("created order is :- "+order);
-				 
-				 // save order in your database
-				 MyOrder myOrder=new MyOrder();
-				 myOrder.setAmount(order.get("amount")+"");
-				 myOrder.setOrderId(order.get("id"));
-				 myOrder.setPaymentId(null);
-				 myOrder.setStatus("created");
-				 myOrder.setReceipt(order.get("receipt"));
-				 myOrder.setUser(this.userRepository.getUserByUserName(principal.getName())
-						               .orElseThrow(()-> new RuntimeException("User Not Found"))
-				               );
-				 
-				 this.myOrderRepository.save(myOrder);
-				 
-				return order.toString();
-			}
-			
-			//handler for update order data in data base
-			@PostMapping("/update_order")
-			public ResponseEntity<?> updateOrder(@RequestBody Map<String, Object>data){
-				//get order id from data base where data you want to update	
-				MyOrder myOrder = this.myOrderRepository.findByOrderId(data.get("order_id").toString());	
-				myOrder.setPaymentId(data.get("payment_id").toString());
-				myOrder.setStatus(data.get("status").toString());
-				this.myOrderRepository.save(myOrder);
-				
-				System.out.println(data);
-				return ResponseEntity.ok(Map.of("msg","updated"));
-			}
+		    contactService.updateContact(imageName,principal.getName(), contactDTO);
+			session.setAttribute("message", new Message("your contact is updated", "success"));
+		return "redirect:/user/contact/"+contactDTO.getCid();
+	}
 
-			/*
-			* this method update login user profile data
-			* along with update security context which hold login user data
-			* during update check email should be unique
-			* */
-			@PostMapping("/profile")
-			public String showProfileEdit(@Valid @ModelAttribute("user") UserDTO userDto, BindingResult result, HttpSession session, Principal principal, RedirectAttributes redirectAttributes){
-				if(result.hasErrors()) {
-					System.out.println("i am here inside the error");
-//					redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
-					redirectAttributes.addFlashAttribute("profileForm", userDto);
-					session.setAttribute("message",new Message("not updated field is required!!","danger"));
-					return "redirect:/user/profile";
-				}
-				User existingUser = userRepository.getUserByUserName(userDto.getEmail())
-						.orElseThrow(() -> new RuntimeException("User not found"));
-				// Only check DB if email changed
-				String loggedInEmail = principal.getName();
-				if (!loggedInEmail.equals(userDto.getEmail())) {
-					if (existingUser != null && existingUser.getId() != userDto.getId()) {
-						System.out.println("i am  2 ");
-						session.setAttribute("message", new Message("Email already exists!", "danger"));
-						return "redirect:/user/profile";
-					}
-				}
-				//to avoid overwrite unintended data,manually update only those fields you want to update
-				existingUser.setEmail(userDto.getEmail());
-				existingUser.setName(userDto.getName());
-				existingUser.setAbout(userDto.getAbout());
-				User updatedUser = userRepository.save(existingUser);
-				SecurityUtils.updateCurrentUser(updatedUser);
-				session.setAttribute("message",new Message("profile update successfully..!!","success"));
-		       return "redirect:/user/profile";
-			}
+	//handler for profile
+	@GetMapping("/profile")
+	public String yourProfile(Model model) {
+		return "normal/profile";
+	}
+
+	//open setting handler
+	@GetMapping("/setting")
+	public String openSetting() {
+		return "normal/setting";
+	}
+
+	//change password handler
+	@PostMapping("/changePassword")
+	public String changePassword(@RequestParam("oldPassword")String oldPassword,@RequestParam("newPassword")String newPassword,Principal principal,HttpSession session) {
+        boolean status = userService.updatePassword(oldPassword,newPassword,principal.getName());
+		if(status){
+			session.setAttribute("message", new Message("your password successfully change", "success"));
+		}else{
+			session.setAttribute("message", new Message("your old password is not match", "danger"));
+			return "redirect:/user/setting";
+		}
+		return "redirect:/user/index";
+	}
+
+	//handler for first time create order for payment
+	@PostMapping("/create_order")
+	@ResponseBody
+	public String createOrder(@RequestBody Map<String, Object>data,Principal principal) throws Exception {
+		System.out.println("order function executed");
+		System.out.println(data);
+		int amt=Integer.parseInt(data.get("amount").toString());
+		System.out.println("amt is : "+amt);
+		//create client(key,secret) ==from rozarpay site which we generate
+		 var client= new RazorpayClient("rzp_test_aetInMhOh05zJ3", "3XoB97MoSvRzLHjcmf7zTTFN");
+		 //creating order
+		 JSONObject object=new JSONObject();
+		 object.put("amount", amt*100);//our amount in rupees ,but we have convert it into paise
+		 object.put("currency", "INR");
+		 object.put("receipt", "txn_23456");
+
+		 Order order = client.orders.create(object);
+		 System.out.println("created order is :- "+order);
+
+		 // save order in your database
+		 MyOrder myOrder=new MyOrder();
+		 myOrder.setAmount(order.get("amount")+"");
+		 myOrder.setOrderId(order.get("id"));
+		 myOrder.setPaymentId(null);
+		 myOrder.setStatus("created");
+		 myOrder.setReceipt(order.get("receipt"));
+		 myOrder.setUser(this.userRepository.getUserByUserName(principal.getName())
+							   .orElseThrow(()-> new RuntimeException("User Not Found"))
+					   );
+
+		 this.myOrderRepository.save(myOrder);
+
+		return order.toString();
+	}
+
+	//handler for update order data in data base
+	@PostMapping("/update_order")
+	public ResponseEntity<?> updateOrder(@RequestBody Map<String, Object>data){
+		//get order id from data base where data you want to update
+		MyOrder myOrder = this.myOrderRepository.findByOrderId(data.get("order_id").toString());
+		myOrder.setPaymentId(data.get("payment_id").toString());
+		myOrder.setStatus(data.get("status").toString());
+		this.myOrderRepository.save(myOrder);
+
+		System.out.println(data);
+		return ResponseEntity.ok(Map.of("msg","updated"));
+	}
+
+	/*
+	* this method update login user profile data
+	* along with update security context which hold login user data
+	* during update check email should be unique
+	* */
+	@PostMapping("/profile")
+	public String showProfileEdit(@Valid @ModelAttribute("user") UserDTO userDto, BindingResult result, HttpSession session, Principal principal){
+		if(result.hasErrors()) {
+			session.setAttribute("message",new Message("field is required!!","danger"));
+			return "/user/profile";
+		}
+		SecurityUtils.updateCurrentUser(userService.updateUser(userDto,principal.getName()));
+		session.setAttribute("message",new Message("profile update successfully..!!","success"));
+	   return "redirect:/user/profile";
+	}
 }
 

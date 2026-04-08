@@ -9,7 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 public class SecurityUtils {
 
-        // ✅ Get current logged-in user
+        // Get current logged-in user
         public static User getCurrentUser() {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth == null || !auth.isAuthenticated()) {
@@ -22,7 +22,7 @@ public class SecurityUtils {
             return null;
         }
 
-        // ✅ Update logged-in user in SecurityContext
+        // Update logged-in user in SecurityContext
         public static void updateCurrentUser(User updatedUser) {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             CustomUserDetails newUserDetails = new CustomUserDetails(updatedUser);

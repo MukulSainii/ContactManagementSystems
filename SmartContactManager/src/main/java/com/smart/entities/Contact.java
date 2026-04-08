@@ -20,7 +20,7 @@ public class Contact {
 	private String image;
 
 //	@Column(name = "category", columnDefinition = "VARCHAR(50)")
-	@Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING)
 	private ContactCategory category;
 	@Column(length=5000)
 	private String description;

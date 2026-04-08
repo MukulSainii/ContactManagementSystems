@@ -14,12 +14,8 @@
             <h1 class="text-center">Add Contacts</h1>
             <div class="container-fluid mt-1">
                 <div class="col-md-10 offset-md-1">
-                    <!--action=jha form bhejna h, enctype=image store karne ke liye,contact class ka object jo ki controller se aayega-->
                     <form action="" th:action="@{/user/addContact}" method="post"
-                          th:object="${contactDTO}" enctype="multipart/form-data"
-                          class="mt-2">
-
-
+                          th:object="${contactDTO}" enctype="multipart/form-data" class="mt-2">
                         <!--first name-->
                         <div class="form-group">
                             <div class="input-group">
@@ -52,7 +48,7 @@
                                   style="color:red">
                             </span>
                         </div>
-
+                        <!--phone number-->
                         <div class="form-group">
                             <div class="input-group mt-3">
                                 <div class="input-group-prepend">
