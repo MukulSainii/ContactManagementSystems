@@ -1,30 +1,22 @@
 package com.smart.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import com.smart.DTO.UserRegisterDTO;
+import com.smart.enums.Gender;
+import com.smart.helper.ImageUtil;
+import com.smart.helper.Message;
+import com.smart.service.serviceInterface.UserService;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import com.smart.dao.UserRepository;
-import com.smart.entities.User;
-import com.smart.helper.Message;
-
-import jakarta.servlet.http.HttpSession;
-
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+@RequiredArgsConstructor
 @Controller
 public class HomeController {
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
-
+    private final UserService userService;
     // Home page mapping
     @GetMapping("/")
     public String home(Model model) {
@@ -43,39 +35,31 @@ public class HomeController {
     @GetMapping("/signup")
     public String signup(Model model) {
         model.addAttribute("title", "signup-page manager");
-        model.addAttribute("user", new User());
+        model.addAttribute("user", new UserRegisterDTO());
+        model.addAttribute("genderList",Gender.values());
         return "signup";
     }
 
     // Handling user registration
     @RequestMapping(value = "/do_register", method = RequestMethod.POST)
-    public String registerUser(@ModelAttribute("user") User user, @RequestParam(value = "agreement", defaultValue = "false") boolean agreement, Model model, HttpSession session) {
-        try {
-            if (!agreement) {
-                System.out.println("You have not agreed to the terms and conditions");
-                throw new Exception("You have not agreed to the terms and conditions");
-            }
-
-            user.setRole("ROLE_USER");
-            user.setEnabled(true);
-            user.setImageURL("Default.png");
-            // Encode user password with BCryptPasswordEncoder
-            user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-            User result = this.userRepository.save(user);
-
-            System.out.println("Agreement: " + agreement);
-            System.out.println("User: " + user);
-            System.out.println("result: " + result);
-
-            model.addAttribute("user", new User());
-            session.setAttribute("message", new Message("Successfully registered!", "alert-success"));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            model.addAttribute("user", user);
-            session.setAttribute("message", new Message("Something went wrong!! " + e.getMessage(), "alert-danger"));
+    public String registerUser(@Valid @ModelAttribute("user") UserRegisterDTO userRegisterDTO, BindingResult result, Model model,
+                               @RequestParam(value = "agreement", defaultValue = "false") boolean agreement,
+                               HttpSession session,@RequestParam("profileImage") MultipartFile file)
+    {
+        if (!agreement) {
+            result.rejectValue("agreement", "You must accept Terms & Conditions");
         }
-        return "signup";
+        if(result.hasErrors()){
+            model.addAttribute("genderList",Gender.values());
+            return "/signup";
+        }
+        if(file != null && !file.isEmpty()){
+            String fileName = ImageUtil.uploadImage(file);
+            userRegisterDTO.setImageURL(fileName);
+        }
+        userService.saveUser(userRegisterDTO);
+        session.setAttribute("message", new Message("Successfully registered!", "alert-success"));
+        return "redirect:/signup";
     }
 
     // Custom login handler

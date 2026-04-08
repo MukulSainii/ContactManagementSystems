@@ -1,30 +1,25 @@
 package com.smart.DTO;
 
-import com.smart.entities.Contact;
 import com.smart.enums.Gender;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
-
-import java.util.ArrayList;
-import java.util.List;
+import lombok.NoArgsConstructor;
 
 @Data
-public class UserDTO {
-    private int id;
-
+@NoArgsConstructor
+public class UserRegisterDTO {
+    private String id;
     @NotBlank(message = "Name is required")
     private String name;
-
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
+    @Email(message = "Invalid email")
     private String email;
+    @NotBlank(message = "Password is require")
     private String password;
+
     private String role;
-
     private String imageURL;
-
     private String about;
     @Pattern(
             regexp = "^(\\+91|91)?[6-9][0-9]{9}$",
@@ -35,5 +30,4 @@ public class UserDTO {
     private String address;
     private Gender gender;
     private boolean enabled;
-    private List<Contact> contacts=new ArrayList<>();
 }

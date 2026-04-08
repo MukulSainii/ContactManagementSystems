@@ -15,6 +15,12 @@ public class GlobalExceptionHandler {
          String referer = request.getHeader("Referer");
          return "redirect:" + (referer != null ? referer : "/");
     }
+    @ExceptionHandler(CustomException.class)
+    public String handleCustomException(CustomException ex, HttpSession session) {
+        ex.printStackTrace(); // print the trace on console
+        session.setAttribute("message", new Message(ex.getUserMessage(), "danger"));
+        return "redirect:" + ex.getRedirectUrl();
+    }
     /*this exception automatically called by spring container
     * when container read the properties from application.properties file
     * spring have Configures multipart resolver, which Checks file size before your controller runs*/

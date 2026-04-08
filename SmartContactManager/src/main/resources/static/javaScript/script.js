@@ -14,60 +14,60 @@ const toggleSidebar=()=>{
 let timeout = null;
 
 const search = () => {
-  let query = $("#search-input").val().trim();
+      let query = $("#search-input").val().trim();
 
-  // Clear previous timeout (Debounce)
-  if (timeout) {
-    clearTimeout(timeout);
-  }
+      // Clear previous timeout (Debounce)
+      if (timeout) {
+        clearTimeout(timeout);
+      }
 
-  // If empty → hide results
-  if (!query) {
-    $(".search-result").hide();
-    return;
-  }
+      // If empty → hide results
+      if (!query) {
+        $(".search-result").hide();
+        return;
+      }
 
-  // Delay API call (300ms debounce)
-  timeout = setTimeout(() => {
-    let url = `http://localhost:8080/search/${query}`;
+      // Delay API call (300ms debounce)
+      timeout = setTimeout(() => {
+        let url = `http://localhost:8080/search/${query}`;
 
-    // Show loading
-    $(".search-result").html("<div class='list-group-item'>Loading...</div>").show();
+        // Show loading
+        $(".search-result").html("<div class='list-group-item'>Loading...</div>").show();
 
-    fetch(url)
-      .then(response => response.json())
-      .then(data => {
+        fetch(url)
+          .then(response => response.json())
+          .then(data => {
 
-        // No result case
-        if (data.length === 0) {
-          $(".search-result").html(
-            "<div class='list-group-item'>No results found</div>"
-          );
-          return;
-        }
+            // No result case
+            if (data.length === 0) {
+              $(".search-result").html(
+                "<div class='list-group-item'>No results found</div>"
+              );
+              return;
+            }
 
-        let text = `<div class='list-group'>`;
+            let text = `<div class='list-group'>`;
 
-        data.forEach(contact => {
-          text += `
-            <a href='/user/contact/${contact.cid}' 
-               class='list-group-item list-group-item-action'>
-               ${contact.name}
-            </a>`;
-        });
+            data.forEach(contact => {
+              text += `
+                <a href='/user/contact/${contact.cid}'
+                   class='list-group-item list-group-item-action'>
+                   ${contact.name}
+                </a>`;
+            });
 
-        text += `</div>`;
+            text += `</div>`;
 
-        $(".search-result").html(text).show();
-      })
-      .catch(error => {
-        console.error("Error:", error);
-        $(".search-result").html(
-          "<div class='list-group-item text-danger'>Something went wrong</div>"
-        );
-      });
+            $(".search-result").html(text).show();
+          })
+          .catch(error => {
+            console.error("Error:", error);
+            $(".search-result").html(
+              "<div class='list-group-item text-danger'>Something went wrong</div>"
+            );
+          });
 
-  }, 300); // ⏳ debounce delay
+      }, 300); // ⏳ debounce delay
 };
 
   //first request to create order

@@ -13,85 +13,129 @@
 			<div class="row">
 				<div class="col-md-6 offset-md-3">
 					<div class="my-card ">
-						
-						  <div th:if="${session.message}" th:classappend="${session.message.type}" class="alert" role="alert">
-						        <p class="text-center" th:text="${session.message.content}"></p>
-						        <th:block th:text="${@sessionHelper.removeMessageFromSession()}"></th:block>
-						  </div>
-						
-							<img style="width:100px"  src="" th:src="@{/Image/register.png}"/>
-					
+					  <div th:if="${session.message}" th:classappend="${session.message.type}" class="alert" role="alert">
+							<p class="text-center" th:text="${session.message.content}"></p>
+							<th:block th:text="${@sessionHelper.removeMessageFromSession()}"></th:block>
+					  </div>
+						<img style="width:100px"  src="" th:src="@{/Image/register.png}"/>
 						<h1 class="text-center">Register Here !!</h1>
-						<form action="" th:action="@{/do_register}" method="post" th:object="${user}">
+
+						<form action="" th:action="@{/do_register}" method="post" th:object="${user}" enctype="multipart/form-data">
 						  <!--name field -->
 							  <div class="mb-3">
 							    <label for="name" class="form-label">Name</label>
 							    <input
-							    name="name"
+							     name="name"
 							     type="text" 
-							    class="form-control"
+							     class="form-control"
 							     id="name" 
 							     aria-describedby="emailHelp"
 							     placeholder="Enter here"
 							     required
-							     th:value="${user.name}"/ >
-							    
+							     th:value="${user.name}">
 							  </div>
 						   <!--email field -->
 							  <div class="mb-3">
 							    <label for="email" class="form-label">Email address</label>
 							    <input 
-							    name="email"
-							    type="email" 
-							    class="form-control"
+							     name="email"
+							     type="email"
+							     class="form-control"
 							     id="email" 
 							     aria-describedby="emailHelp"
 							     placeholder="Enter here"
 							     required
-							      th:value="${user.email}"/ >
-							    
+								 th:value="${user.email}">
 							  </div>
+							<!--phoneNumber field -->
+							<div class="mb-3">
+								<label for="phone" class="form-label">PhoneNumber</label>
+								<input
+										id="phone"
+										class="form-control"
+										type="text"
+										th:field="*{phoneNumber}"
+										pattern="^(\+91|91)?[6-9][0-9]{9}$"
+										aria-describedby="emailHelp"
+										placeholder="Enter here"
+										required
+										oninvalid="this.setCustomValidity('Please enter valid Indian phone number start with 9/7/6')"
+										oninput="this.setCustomValidity('') ">
+							</div>
+                           <!--Gender-->
+							<div class="mb-3">
+								<label for="gender" class="form-label">Gender</label>
+								<select id="gender" th:field="*{gender}" class="form-control">
+									<option value=""> Select Contact Type </option>
+									<option th:each="type : ${genderList}"
+											th:value="${type}" th:text="${type.label}">
+									</option>
+								</select>
+                            </div>
+							<!--DOB field -->
+							<div class="mb-3">
+								<label for="DOB" class="form-label">DOB</label>
+								<input  id = "DOB"
+										name="DOB"
+									   type="text"
+									   class="form-control"
+									   aria-describedby="emailHelp"
+									   placeholder="Enter here"
+									   required >
+
+							</div>
+							<!--Address field -->
+							<div class="mb-3">
+								<label for="address" class="form-label">Address</label>
+								<input  id = "address"
+										name="address"
+										type="text"
+										class="form-control"
+										aria-describedby="emailHelp"
+										placeholder="Enter here"
+										required >
+							</div>
 						   <!--password field -->
 							  <div class="mb-3">
 							    <label for="password" class="form-label">Password</label>
-							    <input 
-							    name="password"
+							    <input name="password"
 							    type="password" 
 							    class="form-control"
 							     id="password" 
 							     aria-describedby="emailHelp"
 							     placeholder="Enter here"
-							     required/ >
-							    
+							     required >
 							  </div>
-							  
-							  
+
 						<!--about field-->	 
 						    <div class="form-group">
-								<textarea name="about"  th:text="${user.about}" placeholder="Enter somthing yourself" rows="5" class="form-cotrol"></textarea>
+								<label for="about" class="form-label">About(Bio)</label>
+								<textarea id="about" name="about"  th:text="${user.about}" placeholder="Enter something yourself" rows="2" class="form-control"></textarea>
+							</div>
+							<!--Contact Image-->
+							<div class="custom-file">
+								<input type="file" name="profileImage"/>
 							</div>
 							
-							<!--term and condition agrement -->
-							    <div class="form-group from-check ml-3">
-									<input 
-									name="agreement"
-									type="checkbox" 
-									 class="form-check-input"
-									  id="agreement"/>
-									<label for="agrement">Aceept Terms And Condition</label>
-								</div>
+							<!--term and condition agreement -->
+							<div class="form-group from-check ml-3">
+								<input
+								name="agreement"
+								type="checkbox"
+								 class="form-check-input"
+								  id="agreement"/>
+								<label for="agreement">Aceept Terms And Condition</label>
+							</div>
+							<!--button -->
 							<div class="container text-center">
 								<button type="submit" class="btn bg-primary btn-block text-white">Submit</button>
 								<button type="reset" class="btn btn-warning btn-block">Reset</button>
-							</div> 
-							  
+							</div>
 						</form>
 					</div> 
 				</div>
 			</div>
-			
 		</div>
-		
 	</section>
   </body>
 </html>

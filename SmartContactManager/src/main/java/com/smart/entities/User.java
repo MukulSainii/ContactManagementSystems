@@ -3,13 +3,9 @@ package com.smart.entities;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import com.smart.enums.Gender;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 
 @Entity
@@ -18,15 +14,21 @@ public class User {
      @GeneratedValue(strategy = GenerationType.AUTO)
 	 private int id;
 	 private String  name;
-	@Column(unique = true)
+	 @Column(unique = true)
+	 @NotNull(message = "UserName cannot be null")
 	 private String  email;
+	private String phoneNumber;
+	 private String DOB;
+	 private String address;
+	 @Enumerated(EnumType.STRING)
+	 private Gender gender;
 	 private String  password;
 	 private String  role;
 	 private String  imageURL;
 	 @Column(length = 500)
 	 private String  about;
 	 private boolean enabled;
-	 //orpahanRemoval =true :- when parent entity unlink from child entity then orphan removal remove child 
+	 //orphanRemoval =true :- when parent entity unlink from child entity then orphan removal remove child
 	 @OneToMany(cascade = CascadeType.ALL,orphanRemoval = true, mappedBy = "user")
 	 private List<Contact>contacts=new ArrayList<>();
 	
@@ -36,7 +38,7 @@ public class User {
 		}
 
 	public User(int id, String name, String email, String password, String role, String imageURL, String about,
-			boolean enabled) {
+			boolean enabled,String phoneNumber, String address, String DOB, Gender gender) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -46,6 +48,10 @@ public class User {
 		this.imageURL = imageURL;
 		this.about = about;
 		this.enabled = enabled;
+		this.phoneNumber = phoneNumber;
+		this.DOB = DOB;
+		this.address = address;
+		this.gender = gender;
 	}
 
 	public int getId() {
@@ -119,21 +125,44 @@ public class User {
 	public void setContacts(List<Contact> contacts) {
 		this.contacts =contacts;
 	}
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
 
-//	@Override
-//	public String toString() {
-//		return "User [id=" + id + ", name=" + name + ", email=" + email + ", password=" + password + ", role=" + role
-//				+ ", imageURL=" + imageURL + ", about=" + about + ", enabled=" + enabled + ", contacts=" + contacts
-//				+ "]";
-//	}
-//    
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
 
+	public String getDOB() {
+		return DOB;
+	}
 
-public void addContact(Contact contact) {
-    contacts.add(contact);
-    contact.setUser(this);
-}
-	
-	
-	 
+	public void setDOB(String DOB) {
+		this.DOB = DOB;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public Gender getGender() {
+		return gender;
+	}
+
+	public void setGender(Gender gender) {
+		this.gender = gender;
+	}
+
+	@Override
+	public String toString() {
+		return "User [id=" + id + ", name=" + name + ", email=" + email + ", password=" + password + ", role=" + role
+				+ ", imageURL=" + imageURL + ", about=" + about + ", enabled=" + enabled + ", DOB=" + DOB + ", phone-number=" + phoneNumber
+				+ ", address=" + address + ", contacts=" + contacts + ", gender=" + gender
+				+ "]";
+	}
+
 }

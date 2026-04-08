@@ -63,7 +63,25 @@ body{
 	padding: 10px 25px;
 	text-decoration: none;
 	color: gray;
-}  
+}
+
+.logout-form {
+    margin: 0;
+    padding: 0;
+}
+
+.logout-btn {
+    display: block;              /* same as .sidebar a */
+    width: 100%;
+    text-align: left;
+    border: none;
+    outline: none;
+    background: none;
+    padding: 10px 25px;          /* match your .sidebar a */
+    color: gray;                 /* match your design */
+    cursor: pointer;
+    font: inherit;               /* same font as links */
+}
 /*hover for changing color when we move cursor on side bar item*/
 .sidebar a:hover{
 	background:#e2e2e2;
@@ -121,4 +139,7 @@ body{
 	background: #212529;
 
 	color: white !important;
+}
+.custom-pr {
+  padding-right: 0.9rem;
 }

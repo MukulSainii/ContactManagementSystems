@@ -2,34 +2,24 @@ package com.smart.service.serviceImpl;
 
 import com.smart.DTO.ContactDTO;
 import com.smart.DTO.mapper.ContactMapper;
-import com.smart.Exception.FileValidationException;
+import com.smart.Exception.CustomException;
 import com.smart.dao.ContactRepository;
 import com.smart.dao.UserRepository;
 import com.smart.entities.Contact;
 import com.smart.entities.User;
-import com.smart.service.ContactService;
+import com.smart.service.serviceInterface.ContactService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.List;
-import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class ContactServiceImpl implements ContactService {
     private static final Logger logger = LoggerFactory.getLogger(ContactServiceImpl.class);
-    @Value("${file.upload-dir}")
-    private String uploadDir;
     private final ContactRepository contactRepository;
     private final UserRepository userRepository;
     private final ContactMapper contactMapper;
@@ -52,56 +42,15 @@ public class ContactServiceImpl implements ContactService {
                 .orElseThrow(() -> new RuntimeException("contact is not found"));
         return contactMapper.toDto(contact);
     }
-
     @Override
-    public String uploadImage(MultipartFile file) {
-        if(file == null){
-            throw new FileValidationException("File cannot be null");
-        }
-        try {
-            validateFile(file);
-            File dir = new File(uploadDir);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-            String filename = UUID.randomUUID() + "_" +file.getOriginalFilename();
-            Path path  = Paths.get(uploadDir,filename);
-            Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-            return filename;
-        }catch(Exception e){
-            logger.error("File upload failed for file: {}", file.getOriginalFilename(), e);
-            throw new FileValidationException("Image upload failed", e);
-        }
+    public Page<ContactDTO> getContacts(Integer page, String username) {
+        int pageSize = 5;
+        User user = userRepository.getUserByUserName(username)
+                .orElseThrow(()->new CustomException("user not found, methodName = getContacts","showing listing failed","normal/show_contact"));
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<Contact> contactsPage = contactRepository.findContactsByUser(user.getId(),pageable);
+        return contactsPage.map(contactMapper::toDto);
     }
-
-    @Override
-    public void deleteImage(String fileName) {
-        try{
-            if (fileName == null) {
-                logger.error("File deletion failed Due to file null!");
-                throw new FileValidationException("File name cannot be null");
-            }
-            Path path = Paths.get(uploadDir,fileName);
-            if (!"default.png".equals(fileName)) {
-                Files.deleteIfExists(path);
-            }
-        }catch (Exception e){
-            logger.error("File deletion failed for file: {}", fileName, e);
-            throw new FileValidationException("Unable to upload file. Please try again later.", e);
-        }
-    }
-
-    @Override
-    public void validateFile(MultipartFile file) {
-        if (file.isEmpty()) {
-            throw new FileValidationException("File is empty");
-        }
-        List<String> allowedTypes = List.of("image/jpeg", "image/png");
-        if (!allowedTypes.contains(file.getContentType())) {
-            throw new FileValidationException("Only JPG and PNG allowed");
-        }
-    }
-
     @Override
     public void saveContact(ContactDTO contactDto, String username) {
         User user = userRepository.getUserByUserName(username)
@@ -109,8 +58,31 @@ public class ContactServiceImpl implements ContactService {
           
         Contact contact = contactMapper.toEntity(contactDto);
         contact.setUser(user);
+        user.getContacts().add(contact); // for consistency of Java object graph
+        userRepository.save(user);
+    }
+
+    @Override
+    public void updateContact(String fileName, String username, ContactDTO contactDTO) {
+        User user = this.userRepository.getUserByUserName(username)
+                .orElseThrow(()-> new CustomException("User Not Found","Update failed, please try again",""));
+        Contact contact =contactMapper.toEntity(contactDTO);
+        contact.setImage(fileName);
+        contact.setUser(user);
+        user.getContacts().add(contact); // for consistency of Java Object Graph
         contactRepository.save(contact);
     }
 
-
+    @Override
+    public void deleteContact(Integer cid, String username) {
+       User user = userRepository.getUserByUserName(username)
+                .orElseThrow(()-> new CustomException("user not found","Deletion failed, Try Again "));
+       Contact contact =  contactRepository.findById(cid)
+               .orElseThrow(()-> new RuntimeException("contact not found"));
+       if(user.getId() != contact.getUser().getId()){
+           throw new CustomException("unauthorized", "/user/show_contact/0");
+       }
+       user.getContacts().remove(contact);
+       userRepository.save(user);
+    }
 }
