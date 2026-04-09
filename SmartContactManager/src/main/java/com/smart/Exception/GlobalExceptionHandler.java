@@ -1,8 +1,10 @@
 package com.smart.Exception;
 
+import com.smart.helper.ApiResponse;
 import com.smart.helper.Message;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -20,6 +22,12 @@ public class GlobalExceptionHandler {
         ex.printStackTrace(); // print the trace on console
         session.setAttribute("message", new Message(ex.getUserMessage(), "danger"));
         return "redirect:" + ex.getRedirectUrl();
+    }
+    @ExceptionHandler(BaseException.class)
+    public ResponseEntity<ApiResponse> paymentExceptionHandler(BaseException ex){
+        ApiResponse response = new ApiResponse(ex.getMessage(),false,ex.getStatus().value());
+//        return new ResponseEntity<ApiResponse>(response,HttpStatus.NOT_FOUND);
+        return ResponseEntity.status(ex.getStatus()).body(response);
     }
     /*this exception automatically called by spring container
     * when container read the properties from application.properties file
