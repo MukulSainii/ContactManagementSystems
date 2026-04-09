@@ -10,4 +10,6 @@ public interface ContactService  {
     public Page<ContactDTO> getContacts(Integer page, String username);
     public void deleteContact(Integer cid, String username);
     public void updateContact(String fileName, String username, ContactDTO contactDTO);
+
+    public ContactDTO searchContact(String searchQuery,String username);
 }

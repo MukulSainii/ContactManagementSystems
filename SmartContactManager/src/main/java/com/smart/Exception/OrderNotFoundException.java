@@ -7,5 +7,4 @@ public class OrderNotFoundException extends BaseException {
         super(message, HttpStatus.NOT_FOUND);
     }
 
-
 }

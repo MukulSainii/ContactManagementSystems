@@ -11,24 +11,19 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-     @ExceptionHandler(FileValidationException .class)
-    public String handleBadRequest(FileValidationException ex, HttpSession session, HttpServletRequest request){
-         session.setAttribute("message", new Message(ex.getMessage(), "danger"));
-         String referer = request.getHeader("Referer");
-         return "redirect:" + (referer != null ? referer : "/");
-    }
     @ExceptionHandler(CustomException.class)
     public String handleCustomException(CustomException ex, HttpSession session) {
         ex.printStackTrace(); // print the trace on console
         session.setAttribute("message", new Message(ex.getUserMessage(), "danger"));
         return "redirect:" + ex.getRedirectUrl();
     }
-    @ExceptionHandler(BaseException.class)
-    public ResponseEntity<ApiResponse> paymentExceptionHandler(BaseException ex){
-        ApiResponse response = new ApiResponse(ex.getMessage(),false,ex.getStatus().value());
-//        return new ResponseEntity<ApiResponse>(response,HttpStatus.NOT_FOUND);
-        return ResponseEntity.status(ex.getStatus()).body(response);
+    @ExceptionHandler(FileValidationException .class)
+    public String handleBadRequest(FileValidationException ex, HttpSession session, HttpServletRequest request){
+         session.setAttribute("message", new Message(ex.getMessage(), "danger"));
+         String referer = request.getHeader("Referer");
+         return "redirect:" + (referer != null ? referer : "/");
     }
+
     /*this exception automatically called by spring container
     * when container read the properties from application.properties file
     * spring have Configures multipart resolver, which Checks file size before your controller runs*/
@@ -38,4 +33,11 @@ public class GlobalExceptionHandler {
         String referer = request.getHeader("Referer");
         return "redirect:" + (referer != null ? referer : "/");
     }
+
+    @ExceptionHandler(BaseException.class)
+    public ResponseEntity<ApiResponse> paymentExceptionHandler(BaseException ex){
+        ApiResponse response = new ApiResponse(ex.getMessage(),false,ex.getStatus().value());
+        return ResponseEntity.status(ex.getStatus()).body(response);
+    }
+
 }
