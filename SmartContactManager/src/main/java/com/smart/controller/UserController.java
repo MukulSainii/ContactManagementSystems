@@ -1,27 +1,21 @@
 package com.smart.controller;
 
-import com.razorpay.Order;
-import com.razorpay.RazorpayClient;
 import com.smart.DTO.ContactDTO;
 import com.smart.DTO.UserDTO;
 import com.smart.DTO.mapper.UserMapper;
-import com.smart.dao.MyOrderRepository;
-import com.smart.dao.UserRepository;
-import com.smart.entities.MyOrder;
 import com.smart.entities.User;
 import com.smart.enums.ContactCategory;
 import com.smart.helper.ImageUtil;
 import com.smart.helper.Message;
 import com.smart.helper.SecurityUtils;
 import com.smart.service.serviceInterface.ContactService;
+import com.smart.service.serviceInterface.PaymentService;
 import com.smart.service.serviceInterface.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.json.JSONObject;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -35,13 +29,10 @@ import java.util.Map;
 @Controller
 @RequestMapping("/user")
 public class UserController {
-	private final BCryptPasswordEncoder bCryptPasswordEncoder;
-	private final UserRepository userRepository;
-	private final MyOrderRepository myOrderRepository;
 	private final UserMapper userMapper;
 	private final ContactService contactService;
 	private final UserService userService;
-
+    private final PaymentService paymentService;
 	
   /*
    *  This annotation will make this method to run before every handler of this controller class
@@ -182,47 +173,13 @@ public class UserController {
 	@PostMapping("/create_order")
 	@ResponseBody
 	public String createOrder(@RequestBody Map<String, Object>data,Principal principal) throws Exception {
-		System.out.println("order function executed");
-		System.out.println(data);
-		int amt=Integer.parseInt(data.get("amount").toString());
-		System.out.println("amt is : "+amt);
-		//create client(key,secret) ==from rozarpay site which we generate
-		 var client= new RazorpayClient("rzp_test_aetInMhOh05zJ3", "3XoB97MoSvRzLHjcmf7zTTFN");
-		 //creating order
-		 JSONObject object=new JSONObject();
-		 object.put("amount", amt*100);//our amount in rupees ,but we have convert it into paise
-		 object.put("currency", "INR");
-		 object.put("receipt", "txn_23456");
-
-		 Order order = client.orders.create(object);
-		 System.out.println("created order is :- "+order);
-
-		 // save order in your database
-		 MyOrder myOrder=new MyOrder();
-		 myOrder.setAmount(order.get("amount")+"");
-		 myOrder.setOrderId(order.get("id"));
-		 myOrder.setPaymentId(null);
-		 myOrder.setStatus("created");
-		 myOrder.setReceipt(order.get("receipt"));
-		 myOrder.setUser(this.userRepository.getUserByUserName(principal.getName())
-							   .orElseThrow(()-> new RuntimeException("User Not Found"))
-					   );
-
-		 this.myOrderRepository.save(myOrder);
-
-		return order.toString();
+		return paymentService.createOrder(data, principal.getName());
 	}
 
 	//handler for update order data in data base
 	@PostMapping("/update_order")
 	public ResponseEntity<?> updateOrder(@RequestBody Map<String, Object>data){
-		//get order id from data base where data you want to update
-		MyOrder myOrder = this.myOrderRepository.findByOrderId(data.get("order_id").toString());
-		myOrder.setPaymentId(data.get("payment_id").toString());
-		myOrder.setStatus(data.get("status").toString());
-		this.myOrderRepository.save(myOrder);
-
-		System.out.println(data);
+		paymentService.updatePayment(data);
 		return ResponseEntity.ok(Map.of("msg","updated"));
 	}
 

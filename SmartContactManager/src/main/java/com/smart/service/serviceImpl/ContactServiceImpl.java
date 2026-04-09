@@ -85,4 +85,11 @@ public class ContactServiceImpl implements ContactService {
        user.getContacts().remove(contact);
        userRepository.save(user);
     }
+
+    @Override
+    public ContactDTO searchContact(String searchQuery, String username) {
+        userRepository.getUserByUserName(username)
+                .orElseThrow(()->new CustomException("user not found","searching failed, please try again",""));
+        return null;
+    }
 }
