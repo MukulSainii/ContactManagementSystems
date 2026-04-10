@@ -14,6 +14,10 @@ public interface UserMapper {
     @Mapping(target = "enabled", constant = "true")
     @Mapping(target = "role", constant = "ROLE_USER")
     User toEntity(UserDTO dto);
+
+    @Mapping(target = "contacts",ignore = true)
+    @Mapping(target = "enabled", constant = "true")
+    @Mapping(target = "role", constant = "ROLE_USER")
     User toEntity(UserRegisterDTO userRegisterDTO);
     //convert userDto to Entity
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)  // do not overwrite the existing value in BD, if any value in Dto is null

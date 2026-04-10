@@ -93,7 +93,8 @@ public class Contact {
 	@Override
 	public String toString() {
 		return "Contact [Cid=" + Cid + ", name=" + name + ", secondname=" + secondname + ", work=" + work + ", email="
-				+ email + ", phone=" + phone + ", category=" + category + ", image=" + image + ", description=" + description + ", user=" + user
+				+ email + ", phone=" + phone + ", category=" + category + ", image=" + image + ", description=" + description + ", userId=" + user.getId()
+				+ ", username= "+user.getName()
 				+ "]";
 	}
 	

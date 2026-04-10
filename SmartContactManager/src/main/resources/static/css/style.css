@@ -143,3 +143,8 @@ body{
 .custom-pr {
   padding-right: 0.9rem;
 }
+.leftText {
+     padding-inline-start: 18rem;
+     padding-top: 1rem;
+}
+

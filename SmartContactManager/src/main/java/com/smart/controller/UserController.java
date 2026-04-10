@@ -5,6 +5,7 @@ import com.smart.DTO.UserDTO;
 import com.smart.DTO.mapper.UserMapper;
 import com.smart.entities.User;
 import com.smart.enums.ContactCategory;
+import com.smart.enums.Gender;
 import com.smart.helper.ImageUtil;
 import com.smart.helper.Message;
 import com.smart.helper.SecurityUtils;
@@ -144,12 +145,6 @@ public class UserController {
 		return "redirect:/user/contact/"+contactDTO.getCid();
 	}
 
-	//handler for profile
-	@GetMapping("/profile")
-	public String yourProfile(Model model) {
-		return "normal/profile";
-	}
-
 	//open setting handler
 	@GetMapping("/setting")
 	public String openSetting() {
@@ -181,6 +176,13 @@ public class UserController {
 	public ResponseEntity<?> updateOrder(@RequestBody Map<String, Object>data){
 		paymentService.updatePayment(data);
 		return ResponseEntity.ok(Map.of("msg","updated"));
+	}
+
+	//handler for profile
+	@GetMapping("/profile")
+	public String yourProfile(Model model) {
+		model.addAttribute("genderList", Gender.values());
+		return "normal/profile";
 	}
 
 	/*
