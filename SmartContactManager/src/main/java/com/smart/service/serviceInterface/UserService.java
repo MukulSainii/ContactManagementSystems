@@ -11,5 +11,6 @@ public interface UserService {
     public User updateUser(UserDTO userDTO, String userName);
     public void saveUser(UserRegisterDTO userRegisterDTO);
     public boolean updatePassword(String oldPassword, String newPassword, String username);
-
+    public void changePassword(String newPassword, String username);
+    public User verifyEmail(String email);
 }

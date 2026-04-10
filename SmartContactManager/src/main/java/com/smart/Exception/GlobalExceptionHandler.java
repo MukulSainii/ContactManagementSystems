@@ -15,6 +15,7 @@ public class GlobalExceptionHandler {
     public String handleCustomException(CustomException ex, HttpSession session) {
         ex.printStackTrace(); // print the trace on console
         session.setAttribute("message", new Message(ex.getUserMessage(), "danger"));
+        System.out.println("your value find : "+session.getAttribute("message").getClass());
         return "redirect:" + ex.getRedirectUrl();
     }
     @ExceptionHandler(FileValidationException .class)
@@ -35,7 +36,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BaseException.class)
-    public ResponseEntity<ApiResponse> paymentExceptionHandler(BaseException ex){
+    public ResponseEntity<ApiResponse> ApiBaseException(BaseException ex){
+        ex.printStackTrace();
         ApiResponse response = new ApiResponse(ex.getMessage(),false,ex.getStatus().value());
         return ResponseEntity.status(ex.getStatus()).body(response);
     }

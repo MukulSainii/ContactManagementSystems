@@ -4,6 +4,7 @@ import com.smart.DTO.UserDTO;
 import com.smart.DTO.UserRegisterDTO;
 import com.smart.DTO.mapper.UserMapper;
 import com.smart.Exception.CustomException;
+import com.smart.Exception.NotFoundException;
 import com.smart.dao.UserRepository;
 import com.smart.entities.User;
 import com.smart.service.serviceInterface.UserService;
@@ -62,4 +63,20 @@ public class UserServiceImpl implements UserService {
             return false;
         }
     }
+
+    @Override
+    public void changePassword(String newPassword, String username) {
+        User currentUser = this.userRepository.getUserByUserName(username)
+                .orElseThrow(()-> new NotFoundException("User Not Found","Password change failed, please try again"));
+        currentUser.setPassword(this.bCryptPasswordEncoder.encode(newPassword));
+        userRepository.save(currentUser);
+    }
+
+    @Override
+    public User verifyEmail(String email) {
+        User user = userRepository.getUserByUserName(email)
+                .orElseThrow(()-> new CustomException("User Not Found","/forgot"));
+        return user;
+    }
+
 }

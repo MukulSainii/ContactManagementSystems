@@ -3,6 +3,7 @@ package com.smart.service.serviceImpl;
 import com.smart.DTO.ContactDTO;
 import com.smart.DTO.mapper.ContactMapper;
 import com.smart.Exception.CustomException;
+import com.smart.Exception.NotFoundException;
 import com.smart.dao.ContactRepository;
 import com.smart.dao.UserRepository;
 import com.smart.entities.Contact;
@@ -15,6 +16,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -65,7 +68,7 @@ public class ContactServiceImpl implements ContactService {
     @Override
     public void updateContact(String fileName, String username, ContactDTO contactDTO) {
         User user = this.userRepository.getUserByUserName(username)
-                .orElseThrow(()-> new CustomException("User Not Found","Update failed, please try again",""));
+                .orElseThrow(()-> new NotFoundException("User Not Found","Update failed, please try again"));
         Contact contact =contactMapper.toEntity(contactDTO);
         contact.setImage(fileName);
         contact.setUser(user);
@@ -87,9 +90,10 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public ContactDTO searchContact(String searchQuery, String username) {
-        userRepository.getUserByUserName(username)
+    public List<ContactDTO> searchContact(String searchQuery, String username) {
+        User user = userRepository.getUserByUserName(username)
                 .orElseThrow(()->new CustomException("user not found","searching failed, please try again",""));
-        return null;
+        List<Contact> contact = contactRepository.findByNameContainingAndUser(searchQuery, user);
+        return contactMapper.toDtoList(contact);
     }
 }

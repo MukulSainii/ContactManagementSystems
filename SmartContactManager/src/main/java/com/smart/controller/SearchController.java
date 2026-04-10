@@ -1,34 +1,25 @@
 package com.smart.controller;
 
-import java.security.Principal;
-import java.util.List;
-
+import com.smart.DTO.ContactDTO;
+import com.smart.service.serviceInterface.ContactService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.smart.dao.ContactRepository;
-import com.smart.dao.UserRepository;
-import com.smart.entities.Contact;
-import com.smart.entities.User;
+import java.security.Principal;
+import java.util.List;
 
 @RestController
 public class SearchController {
-     @Autowired
-     private UserRepository	userRepository;
-     @Autowired
-     private ContactRepository contactRepository;
+    @Autowired
+    private ContactService contactService;
      
      //search handler
      @GetMapping("/search/{query}")
      public ResponseEntity<?> search(@PathVariable("query") String query,Principal principal){
-    	 System.out.println("your search query:"+query);
-    	 User user = this.userRepository.getUserByUserName(principal.getName())
-                 .orElseThrow(()-> new RuntimeException("User Not Found"));
-    	 List<Contact> contact = this.contactRepository.findByNameContainingAndUser(query, user);
-    	 System.out.println("your query contact is : "+contact);
+         List<ContactDTO> contact = contactService.searchContact(query,principal.getName());
     	 return ResponseEntity.ok(contact);
      }
 	
