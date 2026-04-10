@@ -2,8 +2,11 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{normal/base::Layout(~{::section})}">
   <head>
     <!-- Required meta tags -->
-    <meta charset="utf-8">
+      <meta charset="utf-8">
 
+	  <!--    this is meta tag from  user_dashboard html-->
+	  <meta name="_csrf" th:content="${_csrf.token}"/>
+	  <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 
     <title>User dashBoard</title>
   </head>
