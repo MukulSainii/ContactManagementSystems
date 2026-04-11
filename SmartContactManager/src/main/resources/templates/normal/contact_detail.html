@@ -22,7 +22,7 @@
 					  <thead>
 					    <tr>
 					      <th scope="col">#Id</th>
-					      <th scope="col">SCM2020_<span th:text="${contact.Cid}"></span></th>
+					      <th scope="col">SCM2020_<span th:text="${contact.cid}"></span></th>
 
 					    </tr>
 					  </thead>
@@ -52,8 +52,8 @@
 							 <th:block th:utext="${contact.description}"></th:block>
 					</div>
 					<div class="container mt-3">
-						<a href="#" th:href="@{'/user/update_contact/' + ${contact.Cid}}" class="btn btn-primary btn-sm btn-block">Update</a>
-						<form th:action="@{/user/delete/{id}(id=${contact.Cid})}" method="post" onsubmit="return confirmDelete(event)">
+						<a href="#" th:href="@{'/user/update_contact/' + ${contact.cid}}" class="btn btn-primary btn-sm btn-block">Update</a>
+						<form th:action="@{/user/delete/{id}(id=${contact.cid})}" method="post" onsubmit="return confirmDelete(event)">
 							<button type="submit" class="btn btn-danger btn-sm btn-block">
 								Delete
 							</button>

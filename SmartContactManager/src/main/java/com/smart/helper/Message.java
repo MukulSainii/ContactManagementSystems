@@ -1,5 +1,7 @@
 package com.smart.helper;
 
+import lombok.ToString;
+
 public class Message {
     private String content;
     private String type;
@@ -24,5 +26,9 @@ public class Message {
 	public void setType(String type) {
 		this.type = type;
 	}
+//	@Override
+//	public String toString() {
+//		return "Message [content=" + content + ", type=" + type + "]";
+//	}
     
 }

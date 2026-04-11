@@ -7,10 +7,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
 public class ContactDTO {
-    private int Cid;
+    private int cid;
 
     @NotBlank(message = "Name is required")
     @Pattern(
@@ -38,5 +39,6 @@ public class ContactDTO {
     private ContactCategory category;
     private String image;
     private String description;
+    @ToString.Exclude
     private User user;
 }

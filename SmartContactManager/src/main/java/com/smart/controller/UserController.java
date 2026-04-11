@@ -5,6 +5,7 @@ import com.smart.DTO.UserDTO;
 import com.smart.DTO.mapper.UserMapper;
 import com.smart.entities.User;
 import com.smart.enums.ContactCategory;
+import com.smart.enums.Gender;
 import com.smart.helper.ImageUtil;
 import com.smart.helper.Message;
 import com.smart.helper.SecurityUtils;
@@ -101,17 +102,17 @@ public class UserController {
 	}
 	
 	/* Handler for show particular contact details */
-	@GetMapping("/contact/{Cid}")
-	public String showContactDetails(@PathVariable("Cid")Integer Cid,Model model,Principal principal) {
-		ContactDTO contact =	contactService.getContactForUser(Cid,principal.getName());
+	@GetMapping("/contact/{cid}")
+	public String showContactDetails(@PathVariable("cid")Integer cid,Model model,Principal principal) {
+		ContactDTO contact =	contactService.getContactForUser(cid,principal.getName());
 		model.addAttribute("contact",contact);
 		return "normal/contact_detail";
 	}
 
    //handler for delete contact
-   @PostMapping("/delete/{Cid}")
-	public String deleteContact(@PathVariable("Cid") Integer Cid,Model model,HttpSession session,Principal principal) {
-	   contactService.deleteContact(Cid, principal.getName());
+   @PostMapping("/delete/{cid}")
+	public String deleteContact(@PathVariable("cid") Integer cid,Model model,HttpSession session,Principal principal) {
+	   contactService.deleteContact(cid, principal.getName());
 	   session.setAttribute("message",new Message("contact delete successfully..!!","success"));
 		return"redirect:/user/show_contact/0";
 	}
@@ -142,12 +143,6 @@ public class UserController {
 		    contactService.updateContact(imageName,principal.getName(), contactDTO);
 			session.setAttribute("message", new Message("your contact is updated", "success"));
 		return "redirect:/user/contact/"+contactDTO.getCid();
-	}
-
-	//handler for profile
-	@GetMapping("/profile")
-	public String yourProfile(Model model) {
-		return "normal/profile";
 	}
 
 	//open setting handler
@@ -181,6 +176,13 @@ public class UserController {
 	public ResponseEntity<?> updateOrder(@RequestBody Map<String, Object>data){
 		paymentService.updatePayment(data);
 		return ResponseEntity.ok(Map.of("msg","updated"));
+	}
+
+	//handler for profile
+	@GetMapping("/profile")
+	public String yourProfile(Model model) {
+		model.addAttribute("genderList", Gender.values());
+		return "normal/profile";
 	}
 
 	/*

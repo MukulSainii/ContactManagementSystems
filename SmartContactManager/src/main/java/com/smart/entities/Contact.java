@@ -11,7 +11,7 @@ import jakarta.persistence.*;
 public class Contact {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private int Cid;
+	private int cid;
 	private String name;
 	private String secondname;
 	private String work;
@@ -29,11 +29,11 @@ public class Contact {
 	private User user;
 	
 	//getter and setter
-	public int getCid() {
-		return Cid;
+	public int getcid() {
+		return cid;
 	}
-	public void setCid(int cid) {
-		Cid = cid;
+	public void setcid(int cid) {
+		cid = cid;
 	}
 	public String getName() {
 		return name;
@@ -92,8 +92,9 @@ public class Contact {
 	}
 	@Override
 	public String toString() {
-		return "Contact [Cid=" + Cid + ", name=" + name + ", secondname=" + secondname + ", work=" + work + ", email="
-				+ email + ", phone=" + phone + ", category=" + category + ", image=" + image + ", description=" + description + ", user=" + user
+		return "Contact [cid=" + cid + ", name=" + name + ", secondname=" + secondname + ", work=" + work + ", email="
+				+ email + ", phone=" + phone + ", category=" + category + ", image=" + image + ", description=" + description + ", userId=" + user.getId()
+				+ ", username= "+user.getName()
 				+ "]";
 	}
 	
@@ -101,7 +102,7 @@ public class Contact {
 	@Override
 	public boolean equals(Object obj) {
 		// TODO Auto-generated method stub
-		return this.Cid==((Contact)obj).getCid();
+		return this.cid==((Contact)obj).getcid();
 	}
       
 	

@@ -1,29 +1,24 @@
 package com.smart.controller;
 
-import java.util.Random;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import com.smart.entities.User;
+import com.smart.service.EmailService;
+import com.smart.service.serviceInterface.UserService;
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.smart.dao.UserRepository;
-import com.smart.entities.User;
-import com.smart.service.EmailService;
-import jakarta.servlet.http.HttpSession;
+import java.util.Random;
 
 @Controller
+@RequiredArgsConstructor
 public class ForgetController {
 
     Random random = new Random(1000);
-    @Autowired
-    private EmailService emailService;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final EmailService emailService;
+    private final UserService userService;
 
     // Displays the form to enter email for password reset
     @GetMapping("/forgot")
@@ -34,10 +29,9 @@ public class ForgetController {
     // Sends OTP to the provided email
     @PostMapping("/send-OTP")
     public String sendOTP(@RequestParam("email") String email, HttpSession session) {
-        System.out.println("Email: " + email);
+        userService.verifyEmail(email);
         // Generating OTP of 4 digits
         int OTP = random.nextInt(99999);
-        System.out.println("OTP:-" + OTP);
         String subject = "OTP from SCM";
         String message = "" +
                 "<div style='border:1px solid #e2e2e2; padding:20px'>" +
@@ -63,22 +57,14 @@ public class ForgetController {
     // Handles verified OTP
     @PostMapping("/verified_otp")
     public String verifiedOtp(@RequestParam("otp") int otp, HttpSession session) {
-        // Store OTP and email in session
         int MyOtp = (int) session.getAttribute("MyOTP");
         String email = (String) session.getAttribute("email");
-        // If OTP matches
         if (MyOtp == otp) {
-            // Show password change view
-            User user = this.userRepository.getUserByUserName(email)
-                    .orElseThrow(()-> new RuntimeException("User Not Found"));
-
-            // Database se user aana chahiye
+           User user = userService.verifyEmail(email);
             if (user == null) {
-                // If null, send error message
                 session.setAttribute("message", "User does not exist with this email");
                 return "forgetEmail";
             } else {
-                // Redirect to change password form
                 return "passwordChangeForm";
             }
         } else {
@@ -91,10 +77,7 @@ public class ForgetController {
     @PostMapping("/changePassword")
     public String changePassword(@RequestParam("newpassword") String newPassword, HttpSession session) {
         String email = (String) session.getAttribute("email");
-        User user = this.userRepository.getUserByUserName(email)
-                .orElseThrow(()-> new RuntimeException("User Not Found"));
-        user.setPassword(this.bCryptPasswordEncoder.encode(newPassword));
-        this.userRepository.save(user);
+        userService.changePassword(newPassword, email);
         return "redirect:/signin?change=password change successfully";
     }
 }

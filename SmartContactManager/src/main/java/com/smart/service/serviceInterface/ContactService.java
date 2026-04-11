@@ -3,6 +3,8 @@ package com.smart.service.serviceInterface;
 import com.smart.DTO.ContactDTO;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 public interface ContactService  {
     public ContactDTO getContactForUser(Integer contactId, String username);
     public ContactDTO getContactById(Integer id);
@@ -11,5 +13,5 @@ public interface ContactService  {
     public void deleteContact(Integer cid, String username);
     public void updateContact(String fileName, String username, ContactDTO contactDTO);
 
-    public ContactDTO searchContact(String searchQuery,String username);
+    public List<ContactDTO> searchContact(String searchQuery, String username);
 }

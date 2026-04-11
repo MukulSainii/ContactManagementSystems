@@ -4,7 +4,9 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+<!--      this is from normal / base html-->
+      <meta name="_csrf" th:content="${_csrf.token}"/>
+      <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
      <!--forn awesome icon 5 cdn (cdnjs.com)-->
@@ -31,7 +33,7 @@
 
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav ml-auto text-uppercase">
-      <li class="nav-item active">
+      <li th:if="${user == null}" class="nav-item active">
         <a class="nav-link" th:href="@{/}" href="#">Home <span class="sr-only">(current)</span></a>
       </li>
      
@@ -92,8 +94,6 @@
     <!--sweet alert (js.org)-->
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script>
-
-
         function confirmDelete(event) {
           event.preventDefault(); // 💥 stop form submission
           let form = event.target; // current form

@@ -3,7 +3,7 @@ package com.smart.service.serviceImpl;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import com.smart.Exception.BaseException;
-import com.smart.Exception.OrderNotFoundException;
+import com.smart.Exception.NotFoundException;
 import com.smart.dao.MyOrderRepository;
 import com.smart.dao.UserRepository;
 import com.smart.entities.MyOrder;
@@ -23,7 +23,7 @@ public class PaymentServiceImpl implements PaymentService {
     public void updatePayment(Map<String, Object> data) {
         String orderId = data.get("order_id").toString();
         MyOrder myOrder = myOrderRepository.findByOrderId(orderId)
-              .orElseThrow(()-> new OrderNotFoundException("order not found, orderId: "+orderId));
+              .orElseThrow(()-> new NotFoundException("order not found, orderId: "+orderId,"payment failed, please try again"));
         myOrder.setPaymentId(data.get("payment_id").toString());
         myOrder.setStatus(data.get("status").toString());
         myOrderRepository.save(myOrder);
@@ -56,7 +56,7 @@ public class PaymentServiceImpl implements PaymentService {
             myOrderRepository.save(myOrder);
             return order.toString();
         }catch(Exception ex){
-            throw new BaseException("Something went wrong");
+            throw new BaseException("create order failed","payment failed, please try again");
         }
     }
 }
