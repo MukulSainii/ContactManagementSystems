@@ -11,7 +11,7 @@ import lombok.ToString;
 
 @Data
 public class ContactDTO {
-    private int Cid;
+    private int cid;
 
     @NotBlank(message = "Name is required")
     @Pattern(

@@ -102,17 +102,17 @@ public class UserController {
 	}
 	
 	/* Handler for show particular contact details */
-	@GetMapping("/contact/{Cid}")
-	public String showContactDetails(@PathVariable("Cid")Integer Cid,Model model,Principal principal) {
-		ContactDTO contact =	contactService.getContactForUser(Cid,principal.getName());
+	@GetMapping("/contact/{cid}")
+	public String showContactDetails(@PathVariable("cid")Integer cid,Model model,Principal principal) {
+		ContactDTO contact =	contactService.getContactForUser(cid,principal.getName());
 		model.addAttribute("contact",contact);
 		return "normal/contact_detail";
 	}
 
    //handler for delete contact
-   @PostMapping("/delete/{Cid}")
-	public String deleteContact(@PathVariable("Cid") Integer Cid,Model model,HttpSession session,Principal principal) {
-	   contactService.deleteContact(Cid, principal.getName());
+   @PostMapping("/delete/{cid}")
+	public String deleteContact(@PathVariable("cid") Integer cid,Model model,HttpSession session,Principal principal) {
+	   contactService.deleteContact(cid, principal.getName());
 	   session.setAttribute("message",new Message("contact delete successfully..!!","success"));
 		return"redirect:/user/show_contact/0";
 	}

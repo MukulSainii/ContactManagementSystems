@@ -36,7 +36,7 @@
                     </thead>
                     <tbody>
 						<tr th:each="c:  ${contacts}">
-							<th scope="row" th:text="${'SCM2020'+c.Cid}">1</th>
+							<th scope="row" th:text="${'SCM2020'+c.cid}">1</th>
 							<!--show image from folder to client on server-->
 							<td>
 								<img src="" class="my_profile_picture"
@@ -45,17 +45,17 @@
 								<span th:text="${c.name + (#strings.isEmpty(c.secondname) ? '' : ' ' + c.secondname)}"></span>
 							</td>
 							<td>
-								<a href="" th:href="@{'/user/contact/'+${c.Cid}}">
+								<a href="" th:href="@{'/user/contact/'+${c.cid}}">
 									<span th:text="${c.email}"></span>
 								</a>
 							</td>
 							<td th:text="${c.phone}">@mdo</td>
 							<td>
-								<a th:href="@{'/user/update_contact/'+${c.Cid}}"
+								<a th:href="@{'/user/update_contact/'+${c.cid}}"
 								   class="btn btn-primary btn-sm">Update
 								</a>
-								<!-- <a  href="#" th:onclick="|deleteContact(${c.Cid})|" class="btn btn-danger btn-sm mb-1" style="margin-top: 5px;">Delete</a>-->
-								<form th:action="@{/user/delete/{id}(id=${c.Cid})}" method="post"
+								<!-- <a  href="#" th:onclick="|deleteContact(${c.cid})|" class="btn btn-danger btn-sm mb-1" style="margin-top: 5px;">Delete</a>-->
+								<form th:action="@{/user/delete/{id}(id=${c.cid})}" method="post"
 									  onsubmit="return confirmDelete(event)">
 									<button type="submit" class="btn btn-danger btn-sm mb-1 custom-pr">
 										Delete

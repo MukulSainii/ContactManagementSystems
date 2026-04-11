@@ -147,4 +147,7 @@ body{
      padding-inline-start: 18rem;
      padding-top: 1rem;
 }
-
+.my-page h6,
+.my-page .h6 {
+    font-size: 12px;
+}

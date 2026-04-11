@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean updatePassword(String oldPassword, String newPassword, String username) {
         User currentUser = this.userRepository.getUserByUserName(username)
-                .orElseThrow(()-> new RuntimeException("User Not Found"));
+                .orElseThrow(()-> new CustomException("User Not Found","Updating Password failed, please try again","/user/setting"));
         if(this.bCryptPasswordEncoder.matches(oldPassword, currentUser.getPassword())) {
             currentUser.setPassword(this.bCryptPasswordEncoder.encode(newPassword));
             this.userRepository.save(currentUser);
