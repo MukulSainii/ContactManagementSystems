@@ -42,7 +42,7 @@ public class ForgetController {
                 "</h1>" +
                 "</div>";
         String to = email;
-        boolean flag = this.emailService.sendEmail(subject, message, to);
+        boolean flag = emailService.sendEmail(subject, message, to);
         if (flag) {
             session.setAttribute("MyOTP", OTP);
             session.setAttribute("email", email);

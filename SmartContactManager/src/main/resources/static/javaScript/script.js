@@ -1,7 +1,7 @@
 //coding for side bar 
 const toggleSidebar=()=>{
       if($('.sidebar').is(":visible")){
-        //true-if visible to use band karna h 
+        //true-if visible to use band karna h
         $(".sidebar").css("display", "none");
         $(".content").css("margin-left","0%")
       }else{

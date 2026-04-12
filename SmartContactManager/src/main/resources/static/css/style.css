@@ -151,3 +151,20 @@ body{
 .my-page .h6 {
     font-size: 12px;
 }
+.sidebar {
+    display: block;
+    width: 20%;
+}
+
+.sidebar.active {
+    display: block;
+}
+
+.content {
+    margin-left: 20%;
+    transition: 0.3s;
+}
+
+.content.shift {
+    margin-left: 20%;
+}
